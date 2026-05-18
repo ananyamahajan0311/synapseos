@@ -26,3 +26,6 @@ node_modules
 __pycache__
 .env
 dist
+.env
+__pycache__/
+*.pyc
