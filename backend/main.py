@@ -6,13 +6,20 @@ from google import genai
 import os
 import smtplib
 from email.mime.text import MIMEText
+from database import engine, SessionLocal
+from models import User
+from database import Base
+from passlib.context import CryptContext
 
 load_dotenv()
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto"
+)
 app = FastAPI()
-
+Base.metadata.create_all(bind=engine)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
