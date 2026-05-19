@@ -4,6 +4,8 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 from google import genai
 import os
+import smtplib
+from email.mime.text import MIMEText
 
 load_dotenv()
 
@@ -22,6 +24,11 @@ app.add_middleware(
 class PromptRequest(BaseModel):
     prompt: str
 
+class SendEmailRequest(BaseModel):
+    to_email: str
+    subject: str
+    message: str
+
 @app.get("/")
 def home():
     return {"message": "SynapseOS Backend Running"}
@@ -36,4 +43,31 @@ def generate_email(data: PromptRequest):
 
     return {
         "email": response.text
+    }
+@app.post("/send-email")
+def send_email(data: SendEmailRequest):
+
+    sender_email = os.getenv("EMAIL_ADDRESS")
+    sender_password = os.getenv("EMAIL_PASSWORD")
+
+    msg = MIMEText(data.message)
+
+    msg["Subject"] = data.subject
+    msg["From"] = sender_email
+    msg["To"] = data.to_email
+
+    server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
+
+    server.login(sender_email, sender_password)
+
+    server.sendmail(
+        sender_email,
+        data.to_email,
+        msg.as_string()
+    )
+
+    server.quit()
+
+    return {
+        "message": "Email sent successfully"
     }
