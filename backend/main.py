@@ -7,7 +7,7 @@ import os
 import smtplib
 from email.mime.text import MIMEText
 from database import engine, SessionLocal
-from models import User
+from models import User, EmailHistory
 from database import Base
 from passlib.context import CryptContext
 from jose import jwt
@@ -87,15 +87,21 @@ def home():
 @app.post("/generate-email")
 def generate_email(data: PromptRequest):
 
-    response = client.models.generate_content(
-        model="gemini-2.0-flash",
-        contents=f"Write a professional email:\n{data.prompt}"
-    )
-
     return {
-        "email": response.text
-    }
+        "email": f"""Subject: Generated Email
 
+Hello,
+
+This is a demo email generated for:
+
+{data.prompt}
+
+Thank you.
+
+Regards,
+SynapseOS
+"""
+    }
 @app.post("/send-email")
 def send_email(data: SendEmailRequest):
 
@@ -128,6 +134,20 @@ def send_email(data: SendEmailRequest):
     )
 
     server.quit()
+
+    db = SessionLocal()
+
+    new_email = EmailHistory(
+        recipient=data.to_email,
+        subject=data.subject,
+        message=data.message
+    )
+
+    db.add(new_email)
+
+    db.commit()
+
+    db.close()
 
     return {
         "message": "Email sent successfully"
@@ -204,3 +224,14 @@ def login(data: LoginRequest):
         "access_token": access_token,
         "token_type": "bearer"
     }
+
+@app.get("/email-history")
+def get_email_history():
+
+    db = SessionLocal()
+
+    emails = db.query(EmailHistory).all()
+
+    db.close()
+
+    return emails

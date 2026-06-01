@@ -253,8 +253,10 @@ export default function Signup() {
         <div className="su-card">
           <div className="su-header">
             <div className="su-icon-ring">✦</div>
+            <p style={{ fontFamily: "'Syne', sans-serif", fontSize: "13px", letterSpacing: "3px", textTransform: "uppercase", color: "rgba(127,119,221,0.8)", marginBottom: "8px" }}>SynapseOS</p>
             <h1 className="su-title">Create your account</h1>
             <p className="su-sub">Join thousands of users today</p>
+            <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.2)", marginTop: "6px", letterSpacing: "1px" }}>by Ananya Mahajan</p>
           </div>
 
           <div className="su-field">

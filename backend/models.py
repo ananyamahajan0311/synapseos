@@ -12,3 +12,15 @@ class User(Base):
     email = Column(String, unique=True)
 
     password = Column(String)
+
+class EmailHistory(Base):
+
+    __tablename__ = "email_history"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    recipient = Column(String)
+
+    subject = Column(String)
+
+    message = Column(String)
