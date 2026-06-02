@@ -389,3 +389,19 @@ input:focus {
 
   outline: none;
 }
+.history-box {
+
+  width: 700px;
+
+  margin-top: 30px;
+
+  padding: 20px;
+
+  border-radius: 20px;
+
+  background: rgba(255,255,255,0.08);
+
+  backdrop-filter: blur(20px);
+
+  color: white;
+}

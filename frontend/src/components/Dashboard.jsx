@@ -14,17 +14,24 @@ function Dashboard() {
 
   const [toEmail, setToEmail] = useState("");
 
+  const [history, setHistory] = useState([]);
+
   useEffect(() => {
 
-    const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
 
-    if (!token) {
+  if (!token) {
 
-      navigate("/");
+    navigate("/");
 
-    }
+    return;
+  }
 
-  }, []);
+  fetch("http://127.0.0.1:8000/email-history")
+    .then((res) => res.json())
+    .then((data) => setHistory(data));
+
+}, []);
 
   const logout = () => {
 
@@ -129,6 +136,25 @@ function Dashboard() {
           <button onClick={sendEmail}>
             Send Email
           </button>
+        </div>
+
+        <div className="history-box">
+
+          <h2>Email History</h2>
+
+          {history.map((item) => (
+
+            <div key={item.id}>
+
+              <p><b>To:</b> {item.recipient}</p>
+
+              <p><b>Subject:</b> {item.subject}</p>
+
+              <hr />
+
+            </div>
+
+          ))}
 
         </div>
 
