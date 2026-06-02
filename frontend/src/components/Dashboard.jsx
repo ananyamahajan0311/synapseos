@@ -65,25 +65,33 @@ function Dashboard() {
 
   const sendEmail = async () => {
 
-    await fetch(
-      "http://127.0.0.1:8000/send-email",
-      {
-        method: "POST",
+  await fetch(
+    "http://127.0.0.1:8000/send-email",
+    {
+      method: "POST",
 
-        headers: {
-          "Content-Type": "application/json",
-        },
+      headers: {
+        "Content-Type": "application/json",
+      },
 
-        body: JSON.stringify({
-          to_email: toEmail,
-          subject: "AI Generated Email",
-          message: email,
-        }),
-      }
-    );
+      body: JSON.stringify({
+        to_email: toEmail,
+        subject: "AI Generated Email",
+        message: email,
+      }),
+    }
+  );
 
-    alert("Email sent successfully");
-  };
+  const res = await fetch(
+    "http://127.0.0.1:8000/email-history"
+  );
+
+  const data = await res.json();
+
+  setHistory(data);
+
+  alert("Email sent successfully");
+};
 
   return (
 
@@ -140,15 +148,20 @@ function Dashboard() {
 
         <div className="history-box">
 
+        
+
           <h2>Email History</h2>
 
-          {history.map((item) => (
+           <p>
+  Total Emails Sent: {history.length}
+</p>
 
-            <div key={item.id}>
+          {[...history].reverse().map((item) => (
 
-              <p><b>To:</b> {item.recipient}</p>
+  <div key={item.id}>
+<p>📧 {item.recipient}</p>
 
-              <p><b>Subject:</b> {item.subject}</p>
+<p>📝 {item.subject}</p>
 
               <hr />
 
