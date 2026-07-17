@@ -29,3 +29,8 @@ dist
 .env
 __pycache__/
 *.pyc
+node_modules/
+__pycache__/
+*.pyc
+.env
+*.db
