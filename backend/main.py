@@ -12,6 +12,10 @@ from database import Base
 from passlib.context import CryptContext
 from jose import jwt
 from datetime import datetime, timedelta
+from agents.planner import Planner
+from agents.executor import Executor
+from services.ai_service import AIService
+from services.email_service import EmailService
 
 load_dotenv()
 
@@ -31,6 +35,9 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 app = FastAPI()
+planner = Planner()
+executor = Executor()
+ai_service = AIService()
 
 Base.metadata.create_all(bind=engine)
 
@@ -87,72 +94,19 @@ def home():
 @app.post("/generate-email")
 def generate_email(data: PromptRequest):
 
+    email = ai_service.generate_email(data.prompt)
+
     return {
-        "email": f"""Subject: Generated Email
-
-Hello,
-
-This is a demo email generated for:
-
-{data.prompt}
-
-Thank you.
-
-Regards,
-SynapseOS
-"""
+        "email": email
     }
 @app.post("/send-email")
 def send_email(data: SendEmailRequest):
 
-    sender_email = os.getenv("EMAIL_ADDRESS")
-
-    sender_password = os.getenv("EMAIL_PASSWORD")
-
-    msg = MIMEText(data.message)
-
-    msg["Subject"] = data.subject
-
-    msg["From"] = sender_email
-
-    msg["To"] = data.to_email
-
-    server = smtplib.SMTP_SSL(
-        "smtp.gmail.com",
-        465
-    )
-
-    server.login(
-        sender_email,
-        sender_password
-    )
-
-    server.sendmail(
-        sender_email,
+    return email_service.send_email(
         data.to_email,
-        msg.as_string()
+        data.subject,
+        data.message
     )
-
-    server.quit()
-
-    db = SessionLocal()
-
-    new_email = EmailHistory(
-        recipient=data.to_email,
-        subject=data.subject,
-        message=data.message
-    )
-
-    db.add(new_email)
-
-    db.commit()
-
-    db.close()
-
-    return {
-        "message": "Email sent successfully"
-    }
-
 @app.post("/signup")
 def signup(data: SignupRequest):
 
@@ -235,3 +189,16 @@ def get_email_history():
     db.close()
 
     return emails
+@app.post("/chat")
+def chat(data: PromptRequest):
+
+    plan = planner.plan(data.prompt)
+
+    result = executor.execute(plan)
+
+    return {
+        "message": data.prompt,
+        "plan": plan,
+        "result": result
+    }
+    email_service = EmailService()
