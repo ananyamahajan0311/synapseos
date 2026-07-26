@@ -1,13 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 from dotenv import load_dotenv
 from google import genai
 import os
-import smtplib
-from email.mime.text import MIMEText
 from database import engine, SessionLocal
-from models import User, EmailHistory
+from models import EmailHistory
 from database import Base
 from agents.planner import Planner
 from agents.executor import Executor
@@ -23,18 +20,13 @@ client = genai.Client(
     api_key=os.getenv("GEMINI_API_KEY")
 )
 
-SECRET_KEY = "synapseos_secret_key"
-
-ALGORITHM = "HS256"
-
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
-
 app = FastAPI()
 app.include_router(health_router)
 app.include_router(auth_router)
 planner = Planner()
 executor = Executor()
 ai_service = AIService()
+email_service = EmailService()
 
 Base.metadata.create_all(bind=engine)
 
@@ -45,26 +37,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-def create_access_token(data: dict):
-
-    to_encode = data.copy()
-
-    expire = datetime.utcnow() + timedelta(
-        minutes=ACCESS_TOKEN_EXPIRE_MINUTES
-    )
-
-    to_encode.update({"exp": expire})
-
-    encoded_jwt = jwt.encode(
-        to_encode,
-        SECRET_KEY,
-        algorithm=ALGORITHM
-    )
-
-    return encoded_jwt
-
 
 @app.post("/generate-email")
 def generate_email(data: PromptRequest):
@@ -105,4 +77,3 @@ def chat(data: PromptRequest):
         "plan": plan,
         "result": result
     }
-    email_service = EmailService()
