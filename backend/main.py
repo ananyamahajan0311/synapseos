@@ -16,6 +16,8 @@ from agents.planner import Planner
 from agents.executor import Executor
 from services.ai_service import AIService
 from services.email_service import EmailService
+from api.health_routes import router as health_router
+from api.auth_routes import router as auth_router
 
 load_dotenv()
 
@@ -35,6 +37,8 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 app = FastAPI()
+app.include_router(health_router)
+app.include_router(auth_router)
 planner = Planner()
 executor = Executor()
 ai_service = AIService()
@@ -84,12 +88,6 @@ def create_access_token(data: dict):
 
     return encoded_jwt
 
-@app.get("/")
-def home():
-
-    return {
-        "message": "SynapseOS Backend Running"
-    }
 
 @app.post("/generate-email")
 def generate_email(data: PromptRequest):
