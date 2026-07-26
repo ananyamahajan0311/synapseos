@@ -1,27 +1,18 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import Login from "./components/Login";
-import Signup from "./components/Signup";
-import Dashboard from "./components/Dashboard";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Desktop from "./pages/Desktop";
 
 function App() {
-
   return (
-
     <BrowserRouter>
-
       <Routes>
-
         <Route path="/" element={<Login />} />
-
         <Route path="/signup" element={<Signup />} />
-
-        <Route path="/dashboard" element={<Dashboard />} />
-
+        <Route path="/desktop" element={<Desktop />} />
       </Routes>
-
     </BrowserRouter>
-
   );
 }
 
