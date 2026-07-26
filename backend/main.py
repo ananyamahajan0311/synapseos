@@ -9,25 +9,18 @@ from email.mime.text import MIMEText
 from database import engine, SessionLocal
 from models import User, EmailHistory
 from database import Base
-from passlib.context import CryptContext
-from jose import jwt
-from datetime import datetime, timedelta
 from agents.planner import Planner
 from agents.executor import Executor
 from services.ai_service import AIService
 from services.email_service import EmailService
 from api.health_routes import router as health_router
 from api.auth_routes import router as auth_router
+from api.schemas import PromptRequest, SendEmailRequest
 
 load_dotenv()
 
 client = genai.Client(
     api_key=os.getenv("GEMINI_API_KEY")
-)
-
-pwd_context = CryptContext(
-    schemes=["bcrypt"],
-    deprecated="auto"
 )
 
 SECRET_KEY = "synapseos_secret_key"
@@ -53,22 +46,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-class PromptRequest(BaseModel):
-    prompt: str
-
-class SendEmailRequest(BaseModel):
-    to_email: str
-    subject: str
-    message: str
-
-class SignupRequest(BaseModel):
-    username: str
-    email: str
-    password: str
-
-class LoginRequest(BaseModel):
-    email: str
-    password: str
 
 def create_access_token(data: dict):
 
@@ -105,77 +82,6 @@ def send_email(data: SendEmailRequest):
         data.subject,
         data.message
     )
-@app.post("/signup")
-def signup(data: SignupRequest):
-
-    db = SessionLocal()
-
-    existing_user = db.query(User).filter(
-        User.email == data.email
-    ).first()
-
-    if existing_user:
-
-        return {
-            "message": "User already exists"
-        }
-
-    hashed_password = pwd_context.hash(
-        data.password
-    )
-
-    new_user = User(
-        username=data.username,
-        email=data.email,
-        password=hashed_password
-    )
-
-    db.add(new_user)
-
-    db.commit()
-
-    db.refresh(new_user)
-
-    db.close()
-
-    return {
-        "message": "User created successfully"
-    }
-
-@app.post("/login")
-def login(data: LoginRequest):
-
-    db = SessionLocal()
-
-    user = db.query(User).filter(
-        User.email == data.email
-    ).first()
-
-    if not user:
-
-        return {
-            "message": "User not found"
-        }
-
-    if not pwd_context.verify(
-        data.password,
-        user.password
-    ):
-
-        return {
-            "message": "Incorrect password"
-        }
-
-    access_token = create_access_token(
-        data={
-            "sub": user.email
-        }
-    )
-
-    return {
-        "access_token": access_token,
-        "token_type": "bearer"
-    }
 
 @app.get("/email-history")
 def get_email_history():
