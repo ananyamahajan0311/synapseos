@@ -21,15 +21,22 @@ function Desktop() {
   };
 
   const handleSend = async (prompt) => {
-    // Show user's message
-    setMessages((prev) => [
-      ...prev,
-      {
-        sender: "user",
-        text: prompt,
-      },
-    ]);
+    const planText =
+  data.plan.tool === "chat"
+    ? "No tool selected"
+    : `Selected Tool: ${data.plan.tool}`;
 
+const botResponse = `${planText}
+
+${data.result.message}`;
+
+setMessages((prev) => [
+  ...prev,
+  {
+    sender: "bot",
+    text: botResponse,
+  },
+]);
     try {
       const response = await fetch("http://127.0.0.1:8000/chat", {
         method: "POST",
