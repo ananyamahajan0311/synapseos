@@ -11,7 +11,7 @@ function Desktop() {
   const [messages, setMessages] = useState([
     {
       sender: "bot",
-      text: "Hi! I'm SynapseOS. What would you like me to do today?",
+      text: "👋 Hi! I'm SynapseOS.\nHow can I help you today?",
     },
   ]);
 
@@ -21,22 +21,15 @@ function Desktop() {
   };
 
   const handleSend = async (prompt) => {
-    const planText =
-  data.plan.tool === "chat"
-    ? "No tool selected"
-    : `Selected Tool: ${data.plan.tool}`;
+    // Show user's message
+    setMessages((prev) => [
+      ...prev,
+      {
+        sender: "user",
+        text: prompt,
+      },
+    ]);
 
-const botResponse = `${planText}
-
-${data.result.message}`;
-
-setMessages((prev) => [
-  ...prev,
-  {
-    sender: "bot",
-    text: botResponse,
-  },
-]);
     try {
       const response = await fetch("http://127.0.0.1:8000/chat", {
         method: "POST",
@@ -44,22 +37,37 @@ setMessages((prev) => [
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          prompt: prompt,
+          prompt,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Server error");
+        throw new Error("Failed to connect to backend");
       }
 
       const data = await response.json();
+
+      let botMessage = "";
+
+      // Show selected tool if available
+      if (data.plan && data.plan.tool && data.plan.tool !== "chat") {
+        botMessage += `🔧 Tool: ${data.plan.tool}\n\n`;
+      }
+
+      // Show result
+      if (data.result && data.result.message) {
+        botMessage += data.result.message;
+      } else if (data.result) {
+        botMessage += JSON.stringify(data.result, null, 2);
+      } else {
+        botMessage += "No response received.";
+      }
 
       setMessages((prev) => [
         ...prev,
         {
           sender: "bot",
-          text:
-  data.result.message || JSON.stringify(data.result),
+          text: botMessage,
         },
       ]);
     } catch (error) {
@@ -69,7 +77,7 @@ setMessages((prev) => [
         ...prev,
         {
           sender: "bot",
-          text: "❌ Unable to connect to backend.",
+          text: "❌ Unable to connect to SynapseOS backend.",
         },
       ]);
     }
@@ -91,7 +99,7 @@ setMessages((prev) => [
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-4xl">
+      <div className="mx-auto w-full max-w-4xl pb-6">
         <ChatInput onSend={handleSend} />
       </div>
     </div>
