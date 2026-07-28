@@ -334,7 +334,7 @@ export default function Login() {
       if (data.access_token) {
         localStorage.setItem("token", data.access_token);
         setBtnState("success");
-        setTimeout(() => navigate("/dashboard"), 800);
+        setTimeout(() => navigate("/desktop"), 800);
       } else {
         setBtnState("error");
         setTimeout(() => setBtnState("idle"), 2000);
@@ -361,7 +361,7 @@ export default function Login() {
         <div style={styles.pill}>🔒 Secure login</div>
 
         <h1 style={styles.title}>Welcome back</h1>
-        <p style={styles.sub}>Sign in to continue to your dashboard</p>
+        <p style={styles.sub}>Sign in to continue to your desktop</p>
 
         {/* Email */}
         <label style={styles.label} htmlFor="email">
