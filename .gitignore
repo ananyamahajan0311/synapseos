@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Environment
+.env
+backend/.env
+
+# Virtual environments
+venv/
+.venv/
+
+# Databases
+*.db
+
+# Temporary scripts
+backend/test_gemini.py
+backend/list_models.py
