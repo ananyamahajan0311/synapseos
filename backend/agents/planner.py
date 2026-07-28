@@ -1,34 +1,38 @@
-import re
+import json
+from agents.llm import generate_plan
 
 
 class Planner:
 
+    def __init__(self):
+        with open("prompts/planner_prompt.txt", "r", encoding="utf-8") as f:
+            self.system_prompt = f.read()
+
     def plan(self, prompt):
+        response = generate_plan(prompt, self.system_prompt)
 
-        text = prompt.lower().strip()
+        # Clean Gemini output
+        response = (
+            response.replace("```json", "")
+            .replace("```", "")
+            .strip()
+        )
 
-        # Calculator (e.g. 2+2, 45 * 67)
-        match = re.search(r"\d+\s*[\+\-\*/]\s*\d+", text)
-        if match:
+        try:
+            plan = json.loads(response)
+
+            # Validate required fields
+            if "tool" not in plan:
+                plan["tool"] = "chat"
+
+            if "input" not in plan:
+                plan["input"] = prompt
+
+            return plan
+
+        except Exception:
+            # Fallback if Gemini returns invalid JSON
             return {
-                "tool": "calculator",
-                "input": match.group()
+                "tool": "chat",
+                "input": prompt
             }
-
-        # Date / Time
-        if any(word in text for word in ["date", "time", "today"]):
-            return {
-                "tool": "datetime"
-            }
-
-        # Browser
-        if "open google" in text:
-            return {
-                "tool": "browser"
-            }
-
-        # Default
-        return {
-            "tool": "chat",
-            "input": prompt
-        }
