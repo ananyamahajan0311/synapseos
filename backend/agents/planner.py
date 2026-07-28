@@ -1,31 +1,34 @@
+import re
+
+
 class Planner:
-    def plan(self, user_input: str):
-        """
-        Temporary rule-based planner.
-        Later this will use an LLM.
-        """
 
-        text = user_input.lower()
+    def plan(self, prompt):
 
-        if "email" in text:
+        text = prompt.lower().strip()
+
+        # Calculator (e.g. 2+2, 45 * 67)
+        match = re.search(r"\d+\s*[\+\-\*/]\s*\d+", text)
+        if match:
             return {
-                "tool": "gmail",
-                "action": "send_email"
+                "tool": "calculator",
+                "input": match.group()
             }
 
-        if "calendar" in text:
+        # Date / Time
+        if any(word in text for word in ["date", "time", "today"]):
             return {
-                "tool": "calendar",
-                "action": "create_event"
+                "tool": "datetime"
             }
 
-        if "sheet" in text:
+        # Browser
+        if "open google" in text:
             return {
-                "tool": "sheets",
-                "action": "update_sheet"
+                "tool": "browser"
             }
 
+        # Default
         return {
-            "tool": None,
-            "action": "chat"
+            "tool": "chat",
+            "input": prompt
         }
