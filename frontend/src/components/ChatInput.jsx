@@ -11,20 +11,20 @@ function ChatInput({ onSend }) {
   };
 
   return (
-    <div className="border-t border-slate-700 p-5">
+    <div className="border-t border-slate-800 bg-slate-950 p-6">
 
       <textarea
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
-        placeholder="Type your request..."
-        className="h-28 w-full resize-none rounded-xl bg-slate-900 p-4 text-white outline-none"
+        placeholder="Ask SynapseOS to do anything..."
+        className="h-32 w-full resize-none rounded-xl border border-slate-700 bg-slate-900 p-4 text-white outline-none focus:border-indigo-500"
       />
 
       <div className="mt-4 flex justify-end">
 
         <button
           onClick={handleSend}
-          className="rounded-xl bg-indigo-600 px-6 py-3 hover:bg-indigo-700"
+          className="rounded-xl bg-indigo-600 px-8 py-3 font-semibold transition hover:bg-indigo-700"
         >
           Send →
         </button>
