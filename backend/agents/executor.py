@@ -6,19 +6,25 @@ from tools.browser import open_google
 class Executor:
 
     def execute(self, plan):
-
-        tool = plan["tool"]
+        tool = plan.get("tool", "chat")
+        tool_input = plan.get("input", "")
 
         if tool == "calculator":
-            return calculate(plan["input"])
+            return calculate(tool_input)
 
-        if tool == "datetime":
+        elif tool == "datetime":
             return get_datetime()
 
-        if tool == "browser":
-            return open_google()
+        elif tool == "browser":
+            return open_google(tool_input)
+
+        elif tool == "chat":
+            return {
+                "status": "success",
+                "message": f"{tool_input}"
+            }
 
         return {
-            "status": "success",
-            "message": "No tool required."
+            "status": "error",
+            "message": f"Unknown tool: {tool}"
         }
