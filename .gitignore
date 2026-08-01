@@ -17,3 +17,6 @@ venv/
 # Temporary scripts
 backend/test_gemini.py
 backend/list_models.py
+
+credentials.json
+token.json
