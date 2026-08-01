@@ -21,7 +21,7 @@ function Desktop() {
   };
 
   const handleSend = async (prompt) => {
-    // Show user's message
+    // Show user message
     setMessages((prev) => [
       ...prev,
       {
@@ -46,20 +46,30 @@ function Desktop() {
       }
 
       const data = await response.json();
+
       console.log("Backend Response:", data);
 
       let botMessage = "";
 
-      // Show selected tool if available
-      if (data.plan && data.plan.tool && data.plan.tool !== "chat") {
-        botMessage += `🔧 Tool: ${data.plan.tool}\n\n`;
+      // Display tools used
+      if (data.plan && Array.isArray(data.plan)) {
+        data.plan.forEach((step, index) => {
+          if (step.tool !== "chat") {
+            botMessage += `🔧 Step ${index + 1}: ${step.tool}\n`;
+          }
+        });
+
+        if (botMessage !== "") {
+          botMessage += "\n";
+        }
       }
 
-      // Show result
-      if (data.result && data.result.message) {
-        botMessage += data.result.message;
-      } else if (data.result) {
-        botMessage += JSON.stringify(data.result, null, 2);
+      // Display results
+      if (data.results && Array.isArray(data.results)) {
+        data.results.forEach((result, index) => {
+          botMessage += `✅ Result ${index + 1}\n`;
+          botMessage += `${result.message}\n\n`;
+        });
       } else {
         botMessage += "No response received.";
       }
