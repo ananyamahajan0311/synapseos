@@ -39,7 +39,15 @@ Available tools:
    - latest news
    - internet information
 
-4. chat
+4. calendar
+   Use for:
+   - creating calendar events
+   - scheduling meetings
+   - appointments
+   - reminders
+   - adding events
+
+5. chat
    Use for:
    - greetings
    - conversations
@@ -102,6 +110,33 @@ Response:
 }
 
 User:
+Schedule a project meeting
+
+Response:
+{
+  "tool":"calendar",
+  "input":"Project Meeting"
+}
+
+User:
+Create a meeting called Team Discussion
+
+Response:
+{
+  "tool":"calendar",
+  "input":"Team Discussion"
+}
+
+User:
+Add a calendar event for Demo Presentation
+
+Response:
+{
+  "tool":"calendar",
+  "input":"Demo Presentation"
+}
+
+User:
 Hello
 
 Response:
@@ -111,3 +146,18 @@ Response:
 }
 
 Always return ONLY the JSON object.
+
+Conversation history may be included before the latest user request.
+
+Always focus on the latest user request while using previous messages only for context.
+
+Return ONLY valid JSON.
+
+Never explain.
+
+Output format:
+
+{
+  "tool": "...",
+  "input": "..."
+}
