@@ -21,18 +21,16 @@ class Planner:
         try:
             plan = json.loads(response)
 
-            # Validate required fields
-            if "tool" not in plan:
-                plan["tool"] = "chat"
-
-            if "input" not in plan:
-                plan["input"] = prompt
+            # Convert single object into list
+            if isinstance(plan, dict):
+                plan = [plan]
 
             return plan
 
-        except json.JSONDecodeError:
-            # Fallback if Gemini returns invalid JSON
-            return {
-                "tool": "chat",
-                "input": prompt
-            }
+        except Exception:
+            return [
+                {
+                    "tool": "chat",
+                    "input": prompt
+                }
+            ]
