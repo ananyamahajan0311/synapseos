@@ -30,7 +30,7 @@ class Planner:
 
             return plan
 
-        except Exception:
+        except json.JSONDecodeError:
             # Fallback if Gemini returns invalid JSON
             return {
                 "tool": "chat",
