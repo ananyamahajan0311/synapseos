@@ -12,6 +12,16 @@ OR
 
 Return ONLY valid JSON.
 
+IMPORTANT:
+
+If the user wants to CREATE a calendar event,
+use "calendar_create".
+
+If the user wants to VIEW, LIST or CHECK calendar events,
+use "calendar_list".
+
+Never use "browser" for calendar requests.
+
 Never explain.
 Never use markdown.
 
@@ -54,19 +64,28 @@ Available tools:
    - latest news
    - internet information
 
-4. calendar
-   Use for:
-   - creating calendar events
-   - scheduling meetings
-   - appointments
-   - reminders
-   - adding events
+4. calendar_create
+Use for:
+- creating calendar events
+- scheduling meetings
+- appointments
+- reminders
+- adding events
 
-5. chat
-   Use for:
-   - greetings
-   - conversations
-   - questions that require no external tool
+5. calendar_list
+Use for:
+- show my calendar
+- show my upcoming events
+- list my events
+- what meetings do I have
+- today's schedule
+- upcoming meetings
+
+6. chat
+Use for:
+- greetings
+- conversations
+- questions that require no external tool
 
 Examples
 
@@ -129,7 +148,7 @@ Schedule a project meeting
 
 Response:
 {
-  "tool":"calendar",
+  "tool":"calendar_create",
   "input":"Project Meeting"
 }
 
@@ -138,7 +157,7 @@ Create a meeting called Team Discussion
 
 Response:
 {
-  "tool":"calendar",
+  "tool":"calendar_create",
   "input":"Team Discussion"
 }
 
@@ -147,9 +166,38 @@ Add a calendar event for Demo Presentation
 
 Response:
 {
-  "tool":"calendar",
+  "tool":"calendar_create",
   "input":"Demo Presentation"
 }
+
+User:
+Show my upcoming events
+
+Response:
+{
+  "tool":"calendar_list",
+  "input":""
+}
+
+User:
+Show my calendar
+
+Response:
+{
+  "tool":"calendar_list",
+  "input":""
+}
+
+User:
+What meetings do I have today?
+
+Response:
+{
+  "tool":"calendar_list",
+  "input":""
+}
+
+
 
 User:
 Hello
@@ -193,6 +241,34 @@ Response:
         "input":"today"
     }
 ]
+
+User:
+Show my upcoming events
+
+Response:
+{
+    "tool":"calendar_list",
+    "input":""
+}
+
+User:
+What meetings do I have today?
+
+Response:
+{
+    "tool":"calendar_list",
+    "input":""
+}
+
+User:
+Show my calendar
+
+Response:
+{
+    "tool":"calendar_list",
+    "input":""
+}
+
 
 Always return ONLY the JSON object.
 
