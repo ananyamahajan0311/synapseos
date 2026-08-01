@@ -27,7 +27,7 @@ def chat(data: PromptRequest):
         print("============================\n")
 
         # Send the conversation context to Gemini
-        plan = planner.plan(context)
+        plan = planner.plan(data.prompt)
 
         print("PLAN:", plan)
 

@@ -14,11 +14,19 @@ Return ONLY valid JSON.
 
 IMPORTANT:
 
-If the user wants to CREATE a calendar event,
+IMPORTANT:
+
+If the user wants to create a calendar event,
 use "calendar_create".
 
-If the user wants to VIEW, LIST or CHECK calendar events,
+If the user wants to view calendar events,
 use "calendar_list".
+
+If the user wants to delete, remove or cancel a calendar event,
+use "calendar_delete".
+
+Never use the browser tool for calendar requests.
+
 
 Never use "browser" for calendar requests.
 
@@ -70,22 +78,47 @@ Use for:
 - scheduling meetings
 - appointments
 - reminders
-- adding events
 
 5. calendar_list
 Use for:
 - show my calendar
 - show my upcoming events
 - list my events
-- what meetings do I have
 - today's schedule
-- upcoming meetings
 
-6. chat
+6. calendar_delete
+Use for:
+- delete calendar event
+- remove meeting
+- cancel appointment
+- delete reminder
+
+7. chat
 Use for:
 - greetings
 - conversations
-- questions that require no external tool
+- general questions
+
+8. gmail_read
+Use for:
+- read my emails
+- show my latest emails
+- inbox
+- unread emails
+- recent emails
+
+9. gmail_search
+Use for:
+- search emails
+- find emails
+- emails from someone
+- emails about something
+
+10. gmail_send
+Use for:
+- send email
+- compose email
+- email someone
 
 Examples
 
@@ -269,6 +302,77 @@ Response:
     "input":""
 }
 
+User:
+Delete Project Meeting
+
+Response:
+{
+  "tool":"calendar_delete",
+  "input":"Project Meeting"
+}
+
+User:
+Remove Demo Presentation
+
+Response:
+{
+  "tool":"calendar_delete",
+  "input":"Demo Presentation"
+}
+
+User:
+Cancel Team Discussion
+
+Response:
+{
+  "tool":"calendar_delete",
+  "input":"Team Discussion"
+}
+
+User:
+Read my latest emails
+
+Response:
+{
+  "tool":"gmail_read",
+  "input":""
+}
+
+User:
+Show my inbox
+
+Response:
+{
+  "tool":"gmail_read",
+  "input":""
+}
+
+User:
+Search emails from Amazon
+
+Response:
+{
+  "tool":"gmail_search",
+  "input":"Amazon"
+}
+
+User:
+Find emails about internship
+
+Response:
+{
+  "tool":"gmail_search",
+  "input":"internship"
+}
+
+User:
+Send an email to Rahul
+
+Response:
+{
+  "tool":"gmail_send",
+  "input":"Send an email to Rahul"
+}
 
 Always return ONLY the JSON object.
 
