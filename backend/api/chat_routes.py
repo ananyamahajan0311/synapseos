@@ -32,22 +32,21 @@ def chat(data: PromptRequest):
         print("PLAN:", plan)
 
         # Execute the selected tool
-        result = executor.execute(plan, context)
+        results = executor.execute(plan, context)
 
-        print("RESULT:", result)
-
-        # Save the assistant's reply
-        memory.add(
-            "Assistant",
-            result.get("message", "")
+        assistant_reply = "\n\n".join(
+              item.get("message", "")
+              for item in results
         )
+
+        memory.add("Assistant", assistant_reply)
 
         return {
             "status": "success",
             "message": data.prompt,
             "plan": plan,
-            "result": result
-        }
+            "results": results
+            }
 
     except Exception:
         print("\n========== CHAT ERROR ==========")

@@ -1,36 +1,45 @@
 from tools.calculator import calculate
 from tools.datetime_tool import get_datetime
 from tools.browser import open_google
-from agents.chat_agent import chat_with_ai
 from tools.calendar_tool import create_event
+from agents.chat_agent import chat_with_ai
+
 
 class Executor:
 
-    def execute(self, plan, context=""):
-        tool = plan.get("tool", "chat")
-        tool_input = plan.get("input", "")
+    def execute(self, plans, context=""):
 
-        if tool == "calculator":
-            return calculate(tool_input)
+        results = []
 
-        elif tool == "datetime":
-            return get_datetime()
+        for plan in plans:
 
-        elif tool == "browser":
-            return open_google(tool_input)
+            tool = plan.get("tool", "chat")
+            tool_input = plan.get("input", "")
 
-        elif tool == "chat":
-            reply = chat_with_ai(context, tool_input)
+            if tool == "calculator":
+                result = calculate(tool_input)
 
-        elif tool == "calendar":
-            return create_event(tool_input)
+            elif tool == "datetime":
+                result = get_datetime()
 
-            return {
-                "status": "success",
-                "message": reply
-            }
+            elif tool == "browser":
+                result = open_google(tool_input)
 
-        return {
-            "status": "error",
-            "message": f"Unknown tool: {tool}"
-        }
+            elif tool == "calendar":
+                result = create_event(tool_input)
+
+            elif tool == "chat":
+                result = {
+                    "status": "success",
+                    "message": chat_with_ai(context, tool_input)
+                }
+
+            else:
+                result = {
+                    "status": "error",
+                    "message": f"Unknown tool: {tool}"
+                }
+
+            results.append(result)
+
+        return results
