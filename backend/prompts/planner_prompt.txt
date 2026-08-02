@@ -134,6 +134,14 @@ Use for:
 - recent documents
 - my documents
 
+13. sheets_create
+
+Use for:
+- create spreadsheet
+- create Google Sheet
+- new spreadsheet
+- make spreadsheet
+
 Examples
 
 User:
@@ -422,6 +430,24 @@ Response:
 {
   "tool":"docs_list",
   "input":""
+}
+
+User:
+Create a spreadsheet called Expenses
+
+Response:
+{
+  "tool":"sheets_create",
+  "input":"Expenses"
+}
+
+User:
+Create a new Google Sheet named Attendance
+
+Response:
+{
+  "tool":"sheets_create",
+  "input":"Attendance"
 }
 
 Always return ONLY the JSON object.

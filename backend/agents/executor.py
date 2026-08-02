@@ -11,6 +11,7 @@ from tools.gmail_search import search_emails
 from tools.gmail_parser import parse_email_command
 from tools.docs_create import create_document
 from tools.docs_list import list_documents
+from tools.sheets_create import create_sheet
 
 class Executor:
 
@@ -66,6 +67,9 @@ class Executor:
 
             elif tool == "docs_list":
                 result = list_documents()
+
+            elif tool == "sheets_create":
+                result = create_sheet(tool_input)
 
             else:
                 result = {

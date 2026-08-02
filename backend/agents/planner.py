@@ -133,6 +133,17 @@ class Planner:
             "input": ""
               }]
 
+                # ---------------- Google Sheets ----------------
+        if (
+            "spreadsheet" in text
+            or "sheet" in text
+            or "google sheet" in text
+            or "google spreadsheet" in text
+        ):
+            return [{
+                "tool": "sheets_create",
+                "input": prompt
+            }]
         # ---------------- Gemini Fallback ----------------
         response = generate_plan(prompt, self.system_prompt)
 
