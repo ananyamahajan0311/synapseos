@@ -120,6 +120,13 @@ Use for:
 - compose email
 - email someone
 
+11. docs_create
+Use for:
+- create document
+- create Google Doc
+- new document
+- make a document
+
 Examples
 
 User:
@@ -372,6 +379,24 @@ Response:
 {
   "tool":"gmail_send",
   "input":"Send an email to Rahul"
+}
+
+User:
+Create a document called Project Report
+
+Response:
+{
+  "tool":"docs_create",
+  "input":"Project Report"
+}
+
+User:
+Create a new Google Doc named Meeting Notes
+
+Response:
+{
+  "tool":"docs_create",
+  "input":"Meeting Notes"
 }
 
 Always return ONLY the JSON object.

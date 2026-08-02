@@ -9,7 +9,7 @@ from tools.gmail_read import read_emails
 from tools.gmail_send import send_email
 from tools.gmail_search import search_emails
 from tools.gmail_parser import parse_email_command
-
+from tools.docs_create import create_document
 
 class Executor:
 
@@ -59,6 +59,10 @@ class Executor:
                     email["subject"],
                     email["body"]
                     )
+
+            elif tool == "docs_create":
+                result = create_document(tool_input)
+                
             else:
                 result = {
                     "status": "error",

@@ -105,6 +105,21 @@ class Planner:
                 "input": prompt
             }]
 
+        # Google Docs
+                # ---------------- Google Docs ----------------
+        if (
+            "document" in text
+            or "google doc" in text
+            or "create a document" in text
+            or "create document" in text
+            or "create doc" in text
+            or "new document" in text
+        ):
+            return [{
+                "tool": "docs_create",
+                "input": prompt
+            }]
+
         # ---------------- Gemini Fallback ----------------
         response = generate_plan(prompt, self.system_prompt)
 
