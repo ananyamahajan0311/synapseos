@@ -127,6 +127,13 @@ Use for:
 - new document
 - make a document
 
+12. docs_list
+Use for:
+- show documents
+- list Google Docs
+- recent documents
+- my documents
+
 Examples
 
 User:
@@ -397,6 +404,24 @@ Response:
 {
   "tool":"docs_create",
   "input":"Meeting Notes"
+}
+
+User:
+Show my documents
+
+Response:
+{
+  "tool":"docs_list",
+  "input":""
+}
+
+User:
+List my Google Docs
+
+Response:
+{
+  "tool":"docs_list",
+  "input":""
 }
 
 Always return ONLY the JSON object.

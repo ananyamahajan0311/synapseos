@@ -120,6 +120,19 @@ class Planner:
                 "input": prompt
             }]
 
+        # ---------------- Google Docs List ----------------
+        if (
+           "show my documents" in text
+           or "list my documents" in text
+           or "recent documents" in text
+           or "my google docs" in text
+           or "show my docs" in text
+        ):
+           return [{
+            "tool": "docs_list",
+            "input": ""
+              }]
+
         # ---------------- Gemini Fallback ----------------
         response = generate_plan(prompt, self.system_prompt)
 
