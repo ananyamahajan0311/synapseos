@@ -8,9 +8,18 @@ client = genai.Client(
     api_key=os.getenv("GEMINI_API_KEY")
 )
 
+
 def generate_plan(prompt, system_prompt):
     response = client.models.generate_content(
         model="gemini-3.6-flash",
         contents=f"{system_prompt}\n\nUser: {prompt}",
+    )
+    return response.text
+
+
+def generate_content(prompt):
+    response = client.models.generate_content(
+        model="gemini-3.6-flash",
+        contents=prompt,
     )
     return response.text
