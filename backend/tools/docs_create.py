@@ -3,6 +3,7 @@ from googleapiclient.discovery import build
 from services.google_auth import get_credentials
 from tools.docs_write import write_document
 from tools.docs_parser import parse_document_request
+from agents.llm import generate_content
 
 
 def create_document(prompt):
@@ -10,6 +11,20 @@ def create_document(prompt):
 
     # Parse the user's request
     title, content = parse_document_request(prompt)
+
+    # Generate document content using Gemini
+    if content.strip():
+        generated_content = generate_content(
+            f"""Write the content requested below for a Google Document.
+
+Request:
+{content}
+
+Write clear, well-structured content suitable for a document.
+Do not explain what you are doing. Return only the content."""
+        )
+    else:
+        generated_content = f"{title}\n\nCreated by SynapseOS."
 
     service = build(
         "docs",
@@ -25,14 +40,8 @@ def create_document(prompt):
 
     document_id = document["documentId"]
 
-    # Write content if provided
-    if content.strip():
-        write_document(document_id, content)
-    else:
-        write_document(
-            document_id,
-            f"{title}\n\nCreated by SynapseOS."
-        )
+    # Write generated content into the document
+    write_document(document_id, generated_content)
 
     return {
         "status": "success",
