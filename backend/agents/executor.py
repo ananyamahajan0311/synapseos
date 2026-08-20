@@ -22,6 +22,7 @@ class Executor:
 
         spreadsheet_url = None
         calendar_url = None
+        document_url = None
 
         for plan in plans:
 
@@ -101,7 +102,7 @@ class Executor:
                 # was created before this step,
                 # include its link in the email.
 
-                if spreadsheet_url or calendar_url:
+                if spreadsheet_url or calendar_url or document_url:
 
                     if not email["subject"]:
                         email["subject"] = "SynapseOS Task Update"
@@ -121,6 +122,10 @@ class Executor:
                         email["body"] += (
                             f"Calendar Event: {calendar_url}\n\n"
                         )
+                    if document_url:
+                        email["body"] += (
+                            f"Google Document: {document_url}\n\n"
+                            )
 
                     email["body"] += (
                         "Regards,\n"
@@ -138,7 +143,15 @@ class Executor:
             # ---------------- Google Docs Create ----------------
             elif tool == "docs_create":
                 result = create_document(tool_input)
-
+                if result.get("status") == "success":
+                    message = result.get("message", "")
+                    for line in message.splitlines():
+                        if line.startswith("https://docs.google.com/document/"):
+                            document_url = line.strip()
+                            # Stop searching for the URL only.
+                            # Do NOT stop the main plan loop.
+                            break
+                
             # ---------------- Google Docs List ----------------
             elif tool == "docs_list":
                 result = list_documents()
