@@ -1,5 +1,6 @@
 import ast
 import operator
+import re
 
 operators = {
     ast.Add: operator.add,
@@ -24,6 +25,12 @@ def evaluate(node):
 
 
 def calculate(expression):
+    # Extract only the mathematical expression
+    match = re.search(r'[\d\s+\-*/().]+', expression)
+
+    if match:
+        expression = match.group().strip()
+
     tree = ast.parse(expression, mode="eval")
 
     result = evaluate(tree.body)
