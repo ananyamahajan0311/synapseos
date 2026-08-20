@@ -12,7 +12,9 @@ class Planner:
         text = prompt.lower()
 
         # ---------------- Calculator ----------------
-        if "calculate" in text or any(op in text for op in ["+", "-", "*", "/"]):
+        if "calculate" in text or any(
+            op in text for op in ["+", "-", "*", "/"]
+        ):
             return [{
                 "tool": "calculator",
                 "input": prompt
@@ -35,12 +37,18 @@ class Planner:
                 "tool": "calendar_list",
                 "input": ""
             }]
+
         # ---------------- Calendar + Gmail Workflow ----------------
         if (
-                    ("schedule" in text or "create event" in text or "meeting" in text)
-                    and ("email it" in text or "email the" in text or "send it" in text)
-                    ):
-                    return [
+            ("schedule" in text
+             or "create event" in text
+             or "meeting" in text)
+            and
+            ("email it" in text
+             or "email the" in text
+             or "send it" in text)
+        ):
+            return [
                 {
                     "tool": "calendar_create",
                     "input": prompt
@@ -50,6 +58,7 @@ class Planner:
                     "input": prompt
                 }
             ]
+
         # ---------------- Calendar Create ----------------
         if (
             "schedule" in text
@@ -110,19 +119,50 @@ class Planner:
         # ---------------- Sheets + Gmail Workflow ----------------
         if (
             "spreadsheet" in text
-            and ("email it" in text or "email the" in text or "send it" in text)
-            ):
+            and
+            ("email it" in text
+             or "email the" in text
+             or "send it" in text)
+        ):
             return [
                 {
                     "tool": "sheets_create",
                     "input": prompt
-                    },
-                    {
-                        "tool": "gmail_send",
-                        "input": prompt
-                        }
-                        ]
-        
+                },
+                {
+                    "tool": "gmail_send",
+                    "input": prompt
+                }
+            ]
+
+        # ---------------- Docs + Gmail Workflow ----------------
+        # IMPORTANT: This MUST come before Gmail Send.
+        if (
+            (
+                "document" in text
+                or "google doc" in text
+                or "create a document" in text
+                or "create document" in text
+                or "create doc" in text
+                or "new document" in text
+            )
+            and
+            (
+                "email" in text
+                or "send" in text
+            )
+        ):
+            return [
+                {
+                    "tool": "docs_create",
+                    "input": prompt
+                },
+                {
+                    "tool": "gmail_send",
+                    "input": prompt
+                }
+            ]
+
         # ---------------- Gmail Send ----------------
         if (
             "send email" in text
@@ -135,8 +175,7 @@ class Planner:
                 "input": prompt
             }]
 
-        # Google Docs
-                # ---------------- Google Docs ----------------
+        # ---------------- Google Docs ----------------
         if (
             "document" in text
             or "google doc" in text
@@ -152,18 +191,18 @@ class Planner:
 
         # ---------------- Google Docs List ----------------
         if (
-           "show my documents" in text
-           or "list my documents" in text
-           or "recent documents" in text
-           or "my google docs" in text
-           or "show my docs" in text
+            "show my documents" in text
+            or "list my documents" in text
+            or "recent documents" in text
+            or "my google docs" in text
+            or "show my docs" in text
         ):
-           return [{
-            "tool": "docs_list",
-            "input": ""
-              }]
+            return [{
+                "tool": "docs_list",
+                "input": ""
+            }]
 
-                # ---------------- Google Sheets ----------------
+        # ---------------- Google Sheets ----------------
         if (
             "spreadsheet" in text
             or "sheet" in text
@@ -174,11 +213,16 @@ class Planner:
                 "tool": "sheets_create",
                 "input": prompt
             }]
+
         # ---------------- Gemini Fallback ----------------
-        response = generate_plan(prompt, self.system_prompt)
+        response = generate_plan(
+            prompt,
+            self.system_prompt
+        )
 
         response = (
-            response.replace("```json", "")
+            response
+            .replace("```json", "")
             .replace("```", "")
             .strip()
         )
