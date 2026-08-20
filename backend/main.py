@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-from google import genai
 import os
 from database import engine
 from database import Base
@@ -11,10 +10,6 @@ from api.chat_routes import router as chat_router
 from api.email_routes import router as email_router
 
 load_dotenv()
-
-client = genai.Client(
-    api_key=os.getenv("GEMINI_API_KEY")
-)
 
 app = FastAPI()
 app.include_router(health_router)
