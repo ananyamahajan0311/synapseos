@@ -7,6 +7,11 @@ from services.google_auth import get_credentials
 
 
 def send_email(to, subject, body):
+    print("\n========== GMAIL SEND ==========")
+    print(f"To: {to}")
+    print(f"Subject: {subject}")
+    print(f"Body: {body}")
+
     creds = get_credentials()
 
     service = build(
@@ -24,14 +29,20 @@ def send_email(to, subject, body):
         message.as_bytes()
     ).decode()
 
-    service.users().messages().send(
+    response = service.users().messages().send(
         userId="me",
         body={
             "raw": raw
         }
     ).execute()
 
+    message_id = response.get("id")
+
+    print(f"Gmail message ID: {message_id}")
+    print("========== GMAIL SUCCESS ==========\n")
+
     return {
         "status": "success",
-        "message": f"Email sent successfully to {to}"
+        "message": f"Email sent successfully to {to}",
+        "message_id": message_id
     }
