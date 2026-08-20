@@ -13,41 +13,49 @@ from tools.docs_create import create_document
 from tools.docs_list import list_documents
 from tools.sheets_create import create_sheet
 
+
 class Executor:
 
     def execute(self, plans, context=""):
 
         results = []
+        spreadsheet_url = None
 
         for plan in plans:
 
             tool = plan.get("tool", "chat")
             tool_input = plan.get("input", "")
 
+            # ---------------- Calculator ----------------
             if tool == "calculator":
                 result = calculate(tool_input)
 
+            # ---------------- Date & Time ----------------
             elif tool == "datetime":
                 result = get_datetime()
 
+            # ---------------- Browser ----------------
             elif tool == "browser":
                 result = open_google(tool_input)
 
+            # ---------------- Calendar ----------------
             elif tool == "calendar_create":
                 result = create_event(tool_input)
 
             elif tool == "calendar_list":
                 result = list_events()
 
+            elif tool == "calendar_delete":
+                result = delete_event(tool_input)
+
+            # ---------------- Chat ----------------
             elif tool == "chat":
                 result = {
                     "status": "success",
                     "message": chat_with_ai(context, tool_input)
                 }
-            
-            elif tool == "calendar_delete":
-                result = delete_event(tool_input)
 
+            # ---------------- Gmail ----------------
             elif tool == "gmail_read":
                 result = read_emails()
 
@@ -55,28 +63,76 @@ class Executor:
                 result = search_emails(tool_input)
 
             elif tool == "gmail_send":
-                email = parse_email_command(tool_input)
-                result = send_email(
-                    email["to"],
-                    email["subject"],
-                    email["body"]
+
+                # If a spreadsheet was created before this step,
+                # include its link in the email.
+                if spreadsheet_url:
+
+                    email = parse_email_command(tool_input)
+
+                    if not email["subject"]:
+                        email["subject"] = "SynapseOS Project Tasks"
+
+                    email["body"] = (
+                        "Hello,\n\n"
+                        "I have created the project tasks spreadsheet "
+                        "using SynapseOS.\n\n"
+                        f"Spreadsheet: {spreadsheet_url}\n\n"
+                        "Regards,\n"
+                        "SynapseOS"
                     )
 
+                    result = send_email(
+                        email["to"],
+                        email["subject"],
+                        email["body"]
+                    )
+
+                else:
+                    email = parse_email_command(tool_input)
+
+                    result = send_email(
+                        email["to"],
+                        email["subject"],
+                        email["body"]
+                    )
+
+            # ---------------- Google Docs ----------------
             elif tool == "docs_create":
                 result = create_document(tool_input)
 
             elif tool == "docs_list":
                 result = list_documents()
 
+            # ---------------- Google Sheets ----------------
             elif tool == "sheets_create":
-                result = create_sheet(tool_input)
 
+                data = [
+                    ["Project Task", "Status"],
+                    ["Complete SynapseOS backend", "In Progress"],
+                    ["Integrate Google APIs", "In Progress"],
+                    ["Test frontend", "Pending"],
+                    ["Test Gmail integration", "Pending"],
+                    ["Prepare project demo", "Pending"]
+                ]
+
+                result = create_sheet(
+                    "SynapseOS Project Tasks",
+                    data
+                )
+
+                # Save the URL for the next tool
+                if result.get("status") == "success":
+                    spreadsheet_url = result.get("message", "").split(
+                        "\n"
+                    )[-1]
+
+            # ---------------- Unknown Tool ----------------
             else:
                 result = {
                     "status": "error",
                     "message": f"Unknown tool: {tool}"
                 }
-
 
             results.append(result)
 
