@@ -93,6 +93,22 @@ class Planner:
                 "input": prompt
             }]
 
+        # ---------------- Sheets + Gmail Workflow ----------------
+        if (
+            "spreadsheet" in text
+            and ("email it" in text or "email the" in text or "send it" in text)
+            ):
+            return [
+                {
+                    "tool": "sheets_create",
+                    "input": prompt
+                    },
+                    {
+                        "tool": "gmail_send",
+                        "input": prompt
+                        }
+                        ]
+
         # ---------------- Gmail Send ----------------
         if (
             "send email" in text
