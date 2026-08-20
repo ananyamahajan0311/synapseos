@@ -27,6 +27,28 @@ class Planner:
                 "input": ""
             }]
 
+        # ---------------- Gmail → Calendar Workflow ----------------
+        if (
+            (
+                "email" in text
+                or "gmail" in text
+                )
+                and (
+                    "calendar" in text
+                    or "schedule" in text
+                    or "meeting" in text
+                    )
+                    ):
+            return [
+                {
+                    "tool": "gmail_search",
+                    "input": text
+                    },
+                    {
+                        "tool": "calendar_create_from_email",
+                       "input": ""
+        }
+    ]
         # ---------------- Calendar List ----------------
         if (
             "show my calendar" in text
@@ -102,6 +124,28 @@ class Planner:
                 "input": ""
             }]
 
+        # ---------------- Gmail → Calendar Workflow ----------------
+        if (
+            (
+        "email" in text
+        or "gmail" in text
+        )
+        and (
+            "calendar" in text
+            or "schedule" in text
+            or "meeting" in text
+            )
+            ):
+            return [
+                {
+                    "tool": "gmail_search",
+                    "input": text
+                    },
+                    {
+                        "tool": "calendar_create_from_email",
+                        "input": ""
+                        }
+                        ]
         # ---------------- Gmail Search ----------------
         if (
             "search email" in text
