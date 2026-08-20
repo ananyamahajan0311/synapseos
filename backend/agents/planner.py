@@ -35,7 +35,21 @@ class Planner:
                 "tool": "calendar_list",
                 "input": ""
             }]
-
+        # ---------------- Calendar + Gmail Workflow ----------------
+        if (
+                    ("schedule" in text or "create event" in text or "meeting" in text)
+                    and ("email it" in text or "email the" in text or "send it" in text)
+                    ):
+                    return [
+                {
+                    "tool": "calendar_create",
+                    "input": prompt
+                },
+                {
+                    "tool": "gmail_send",
+                    "input": prompt
+                }
+            ]
         # ---------------- Calendar Create ----------------
         if (
             "schedule" in text
@@ -108,7 +122,7 @@ class Planner:
                         "input": prompt
                         }
                         ]
-
+        
         # ---------------- Gmail Send ----------------
         if (
             "send email" in text
