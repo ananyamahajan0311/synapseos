@@ -1,11 +1,10 @@
-from datetime import datetime, timedelta
-
 from googleapiclient.discovery import build
 
 from services.google_auth import get_credentials
+from tools.calendar_parser import parse_event
 
 
-def create_event(summary):
+def create_event(user_input):
     creds = get_credentials()
 
     service = build(
@@ -14,17 +13,16 @@ def create_event(summary):
         credentials=creds
     )
 
-    start = datetime.utcnow() + timedelta(minutes=5)
-    end = start + timedelta(hours=1)
+    title, start, end = parse_event(user_input)
 
     event = {
-        "summary": summary,
+        "summary": title,
         "start": {
-            "dateTime": start.isoformat() + "Z",
+            "dateTime": start.isoformat(),
             "timeZone": "Asia/Kolkata",
         },
         "end": {
-            "dateTime": end.isoformat() + "Z",
+            "dateTime": end.isoformat(),
             "timeZone": "Asia/Kolkata",
         },
     }
@@ -36,5 +34,10 @@ def create_event(summary):
 
     return {
         "status": "success",
-        "message": f"Calendar event created.\n{event['htmlLink']}"
+        "message": (
+            f"✅ Calendar event created successfully!\n\n"
+            f"📌 Title: {title}\n"
+            f"🕒 Start: {start.strftime('%d %b %Y %I:%M %p')}\n"
+            f"🔗 {event['htmlLink']}"
+        )
     }
