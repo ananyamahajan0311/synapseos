@@ -2,7 +2,12 @@ from datetime import timedelta
 import dateparser
 
 
+# ============================================================
+# PARSE NORMAL CALENDAR REQUEST
+# ============================================================
+
 def parse_event(user_input):
+
     title = "Meeting"
 
     text = user_input.lower()
@@ -26,3 +31,49 @@ def parse_event(user_input):
     end = dt + timedelta(hours=1)
 
     return title, dt, end
+
+
+# ============================================================
+# PARSE MEETING FROM EMAIL
+# ============================================================
+
+def parse_meeting_from_email(email_text):
+
+    title = "Meeting"
+
+    # Extract subject
+    for line in email_text.splitlines():
+
+        line = line.strip()
+
+        if line.lower().startswith("subject:"):
+
+            subject = line.split(":", 1)[1].strip()
+
+            if subject:
+                title = subject
+
+            break
+
+    # Extract date and time
+    dt = dateparser.parse(
+        email_text,
+        settings={
+            "PREFER_DATES_FROM": "future"
+        }
+    )
+
+    if dt is None:
+        return {
+            "status": "error",
+            "message": (
+                "Could not detect a meeting date or time "
+                "from the email."
+            )
+        }
+
+    return {
+        "status": "success",
+        "title": title,
+        "start": dt
+    }
