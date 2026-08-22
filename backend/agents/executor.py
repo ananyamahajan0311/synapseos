@@ -310,46 +310,11 @@ class Executor:
             # ==================================================
 
             elif tool == "sheets_create":
-
-                data = [
-                    [
-                        "Project Task",
-                        "Status"
-                    ],
-                    [
-                        "Complete SynapseOS backend",
-                        "In Progress"
-                    ],
-                    [
-                        "Integrate Google APIs",
-                        "In Progress"
-                    ],
-                    [
-                        "Test frontend",
-                        "Pending"
-                    ],
-                    [
-                        "Test Gmail integration",
-                        "Pending"
-                    ],
-                    [
-                        "Prepare project demo",
-                        "Pending"
-                    ]
-                ]
-
-                result = create_sheet(
-                    "SynapseOS Project Tasks",
-                    data
-                )
-
+                result = create_sheet(tool_input)
                 if result.get("status") == "success":
+                    spreadsheet_url = result.get("url")
 
-                    spreadsheet_url = result.get(
-                        "message",
-                        ""
-                    ).split("\n")[-1]
-
+                
             # ==================================================
             # UNKNOWN TOOL
             # ==================================================
