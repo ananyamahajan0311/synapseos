@@ -14,6 +14,7 @@ def generate_plan(prompt, system_prompt):
         model="gemini-3.6-flash",
         contents=f"{system_prompt}\n\nUser: {prompt}",
     )
+
     return response.text
 
 
@@ -21,37 +22,47 @@ def generate_content(prompt):
     response = client.models.generate_content(
         model="gemini-3.6-flash",
         contents=f"""
-You are the document-writing assistant for SynapseOS.
+You are the document-generation assistant for SynapseOS.
 
-Create well-structured content for the user's document request.
+The user wants to create a document.
+
+USER REQUEST:
+{prompt}
+
+Understand the user's request and generate the ACTUAL content
+they requested.
+
+Do not merely repeat, summarize, or describe the request.
+
+Follow all requirements specified by the user, including:
+- topic
+- quantity
+- format
+- structure
+- difficulty
+- language
+- answers
+- examples
+- length
+- any other constraints
+
+If the user asks for multiple items, generate all requested items.
+If the user specifies a number, produce exactly that number.
+
+Use clear headings, numbering, paragraphs, and bullet points
+where appropriate.
 
 Formatting rules:
-- Use # at the beginning of a line for major section headings.
+- Use # for major section headings.
 - Put each heading on its own line.
-- Put normal content below each heading as paragraphs.
-- Use bullet points with "- " when appropriate.
+- Use paragraphs for normal content.
+- Use "- " for bullet points when appropriate.
 - Do not use Markdown code blocks.
-- Do not add explanations outside the requested document.
-- Return only the document content.
+- Return ONLY the content that belongs in the document.
+- Do not explain your process.
 
-Example:
-
-# Introduction
-
-Artificial intelligence is a field of computer science...
-
-# Applications
-
-- Healthcare
-- Education
-- Finance
-
-# Conclusion
-
-AI is transforming many industries.
-
-User request:
-{prompt}
+Generate the final document content now.
 """,
     )
+
     return response.text
