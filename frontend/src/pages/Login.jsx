@@ -7,147 +7,139 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    background: "#0f0f13",
-    fontFamily: "'DM Sans', sans-serif",
-    padding: "2rem 1rem",
-  },
-  card: {
-    width: "100%",
-    maxWidth: "400px",
-    background: "#16161d",
-    border: "1px solid #2a2a38",
-    borderRadius: "24px",
-    padding: "2.5rem 2rem",
+    background:
+      "linear-gradient(180deg, #EFE9F9 0%, #E3DAF4 45%, #D8CCEF 100%)",
+    fontFamily: "'Nunito', sans-serif",
+    padding: "2.5rem 1rem",
     position: "relative",
     overflow: "hidden",
   },
-  glowTop: {
+  cloud: {
     position: "absolute",
-    width: "220px",
-    height: "220px",
+    background: "#ffffffaa",
     borderRadius: "50%",
-    background: "radial-gradient(circle, #7F77DD33 0%, transparent 70%)",
-    top: "-80px",
-    right: "-60px",
-    pointerEvents: "none",
+    filter: "blur(0.5px)",
+    animation: "float 6s ease-in-out infinite",
   },
-  glowBottom: {
+  potWrap: {
     position: "absolute",
-    width: "180px",
-    height: "180px",
-    borderRadius: "50%",
-    background: "radial-gradient(circle, #5DCAA522 0%, transparent 70%)",
-    bottom: "-60px",
-    left: "-40px",
-    pointerEvents: "none",
-  },
-  logo: {
+    bottom: "6%",
     display: "flex",
+    flexDirection: "column",
     alignItems: "center",
-    gap: "10px",
-    marginBottom: "2rem",
   },
-  logoMark: {
-    width: "36px",
-    height: "36px",
-    borderRadius: "10px",
-    background: "linear-gradient(135deg, #7F77DD, #5DCAA5)",
+  cardOuter: {
+    width: "100%",
+    maxWidth: "380px",
+    position: "relative",
+    zIndex: 2,
+  },
+  character: {
+    position: "relative",
+    zIndex: 3,
+    display: "flex",
+    justifyContent: "center",
+    marginBottom: "-38px",
+  },
+  card: {
+    width: "100%",
+    background: "#FDFCFB",
+    borderRadius: "32px",
+    padding: "56px 2rem 2rem",
+    boxShadow: "0 30px 60px -20px rgba(90, 70, 140, 0.35)",
+    position: "relative",
+    boxSizing: "border-box",
+  },
+  headWrap: {
+    textAlign: "center",
+    marginBottom: "1.75rem",
+  },
+  title: {
+    fontFamily: "'Baloo 2', sans-serif",
+    fontSize: "26px",
+    fontWeight: 700,
+    color: "#4A3F6B",
+    margin: "0 0 4px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    fontSize: "18px",
-  },
-  logoText: {
-    fontFamily: "'Syne', sans-serif",
-    fontSize: "18px",
-    fontWeight: 800,
-    color: "#fff",
-    letterSpacing: "-0.5px",
-  },
-  pill: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "5px",
-    background: "#7F77DD1a",
-    color: "#a09ae8",
-    fontSize: "11px",
-    fontWeight: 500,
-    padding: "3px 9px",
-    borderRadius: "20px",
-    marginBottom: "1.25rem",
-    border: "1px solid #7F77DD33",
-  },
-  title: {
-    fontFamily: "'Syne', sans-serif",
-    fontSize: "26px",
-    fontWeight: 800,
-    color: "#fff",
-    margin: "0 0 6px",
-    letterSpacing: "-0.5px",
+    gap: "8px",
   },
   sub: {
-    fontSize: "14px",
-    color: "#666",
-    margin: "0 0 2rem",
-  },
-  label: {
-    display: "block",
-    fontSize: "11px",
-    fontWeight: 500,
-    color: "#555",
-    letterSpacing: "0.07em",
-    textTransform: "uppercase",
-    marginBottom: "6px",
+    fontSize: "13.5px",
+    color: "#9B92B3",
+    margin: 0,
+    fontWeight: 600,
   },
   fieldWrap: {
     position: "relative",
-    marginBottom: "1.25rem",
+    marginBottom: "1rem",
   },
-  fieldIcon: {
+  fieldIconWrap: {
     position: "absolute",
-    left: "12px",
-    top: "50%",
-    transform: "translateY(-50%)",
-    fontSize: "16px",
-    color: "#444",
+    left: "6px",
+    top: "6px",
+    width: "32px",
+    height: "32px",
+    borderRadius: "50%",
+    background: "linear-gradient(135deg, #A79AE8, #8B7BDC)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "#fff",
+    fontSize: "14px",
     pointerEvents: "none",
-    zIndex: 1,
   },
   input: {
     width: "100%",
     height: "44px",
-    padding: "0 12px 0 38px",
-    borderRadius: "12px",
-    border: "1px solid #2a2a38",
-    background: "#1c1c26",
+    padding: "0 40px 0 48px",
+    borderRadius: "22px",
+    border: "1.5px solid #ECE7F7",
+    background: "#F7F4FC",
     fontSize: "14px",
-    fontFamily: "'DM Sans', sans-serif",
-    color: "#e0e0e0",
+    fontFamily: "'Nunito', sans-serif",
+    fontWeight: 600,
+    color: "#4A3F6B",
     outline: "none",
     boxSizing: "border-box",
     transition: "border-color 0.15s, box-shadow 0.15s",
+  },
+  eyeToggle: {
+    position: "absolute",
+    right: "14px",
+    top: "50%",
+    transform: "translateY(-50%)",
+    background: "none",
+    border: "none",
+    color: "#B4ABCB",
+    cursor: "pointer",
+    fontSize: "16px",
+    padding: 0,
+    display: "flex",
   },
   forgot: {
     display: "block",
     textAlign: "right",
     fontSize: "12px",
-    color: "#7F77DD",
+    color: "#8B7BDC",
     textDecoration: "none",
-    marginTop: "-0.75rem",
-    marginBottom: "1.5rem",
+    marginBottom: "1.4rem",
     cursor: "pointer",
     background: "none",
     border: "none",
+    fontWeight: 700,
+    padding: 0,
   },
   btn: {
     width: "100%",
-    height: "46px",
-    borderRadius: "12px",
+    height: "48px",
+    borderRadius: "24px",
     border: "none",
-    background: "linear-gradient(135deg, #7F77DD, #5DCAA5)",
+    background: "linear-gradient(135deg, #9C8FE6, #7C6DD8)",
     color: "#fff",
-    fontFamily: "'Syne', sans-serif",
-    fontSize: "15px",
+    fontFamily: "'Baloo 2', sans-serif",
+    fontSize: "16px",
     fontWeight: 700,
     letterSpacing: "0.02em",
     cursor: "pointer",
@@ -156,116 +148,189 @@ const styles = {
     justifyContent: "center",
     gap: "8px",
     transition: "transform 0.12s, opacity 0.12s",
-    position: "relative",
-    overflow: "hidden",
+    boxShadow: "0 10px 24px -8px rgba(124, 109, 216, 0.7)",
   },
   dividerWrap: {
     display: "flex",
     alignItems: "center",
     gap: "12px",
-    margin: "1.5rem 0",
+    margin: "1.5rem 0 1.25rem",
   },
   dividerLine: {
     flex: 1,
     height: "1px",
-    background: "#2a2a38",
+    background: "#ECE7F7",
   },
   dividerText: {
     fontSize: "12px",
-    color: "#444",
+    color: "#B4ABCB",
     whiteSpace: "nowrap",
+    fontWeight: 700,
   },
   socialRow: {
     display: "flex",
-    gap: "10px",
+    gap: "12px",
+    justifyContent: "center",
   },
   socialBtn: {
-    flex: 1,
-    height: "40px",
-    borderRadius: "10px",
-    border: "1px solid #2a2a38",
-    background: "#1c1c26",
-    color: "#888",
-    fontSize: "13px",
-    fontFamily: "'DM Sans', sans-serif",
+    width: "44px",
+    height: "44px",
+    borderRadius: "50%",
+    border: "1.5px solid #ECE7F7",
+    background: "#fff",
+    fontSize: "18px",
     cursor: "pointer",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    gap: "7px",
-    transition: "background 0.12s, border-color 0.12s",
+    transition: "transform 0.12s, border-color 0.12s",
   },
   signupRow: {
     textAlign: "center",
     marginTop: "1.5rem",
     fontSize: "13px",
-    color: "#555",
+    color: "#9B92B3",
+    fontWeight: 600,
   },
   signupLink: {
-    color: "#7F77DD",
+    color: "#8B7BDC",
     textDecoration: "none",
-    fontWeight: 500,
+    fontWeight: 800,
   },
 };
 
-// Inject Google Fonts + keyframes once
 const injectFonts = () => {
   if (document.getElementById("login-fonts")) return;
   const link = document.createElement("link");
   link.id = "login-fonts";
   link.rel = "stylesheet";
   link.href =
-    "https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap";
+    "https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap";
   document.head.appendChild(link);
-
-  const tablerLink = document.createElement("link");
-  tablerLink.rel = "stylesheet";
-  tablerLink.href =
-    "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css";
-  document.head.appendChild(tablerLink);
 
   const styleEl = document.createElement("style");
   styleEl.textContent = `
-    @keyframes shine {
-      0% { left: -100%; }
-      40% { left: 120%; }
-      100% { left: 120%; }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    @keyframes bob {
+      0%, 100% { transform: translateY(0px) rotate(-1deg); }
+      50% { transform: translateY(-6px) rotate(1deg); }
     }
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
     .login-input:focus {
-      border-color: #7F77DD !important;
-      box-shadow: 0 0 0 3px #7F77DD22 !important;
+      border-color: #8B7BDC !important;
+      box-shadow: 0 0 0 3px #8B7BDC22 !important;
+      background: #fff !important;
+    }
+    .login-input::placeholder {
+      color: #C3BBDB;
+      font-weight: 600;
     }
     .login-social-btn:hover {
-      background: #222230 !important;
-      border-color: #3a3a50 !important;
-      color: #bbb !important;
+      transform: translateY(-2px);
+      border-color: #C9BFEA !important;
     }
     .login-btn:hover {
-      transform: translateY(-1px);
-      opacity: 0.92;
+      transform: translateY(-2px);
+      opacity: 0.95;
     }
     .login-btn:active {
       transform: scale(0.98) !important;
     }
-    .btn-shine {
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 60%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      animation: shine 2.4s infinite;
+    .login-character {
+      animation: bob 4.5s ease-in-out infinite;
     }
   `;
   document.head.appendChild(styleEl);
 };
 
+function PlantPot({ side }) {
+  return (
+    <div style={{ ...styles.potWrap, [side]: "4%" }}>
+      <svg width="90" height="110" viewBox="0 0 90 110" fill="none">
+        <ellipse cx="45" cy="98" rx="26" ry="8" fill="#00000014" />
+        <path d="M20 55 L28 100 H62 L70 55 Z" fill="#D8A97C" />
+        <path d="M20 55 L70 55 L66 68 H24 Z" fill="#C79066" />
+        <path
+          d="M45 55 C 20 45, 15 15, 40 5 C 38 25, 42 40, 45 55 Z"
+          fill="#6FAE7C"
+        />
+        <path
+          d="M45 55 C 70 40, 78 12, 55 2 C 55 22, 50 40, 45 55 Z"
+          fill="#5C9A69"
+        />
+        <path
+          d="M45 55 C 45 25, 48 8, 45 0 C 42 8, 45 25, 45 55 Z"
+          fill="#82BB8E"
+        />
+      </svg>
+    </div>
+  );
+}
+
+function Character() {
+  return (
+    <div style={styles.character}>
+      <svg
+        className="login-character"
+        width="170"
+        height="150"
+        viewBox="0 0 170 150"
+        fill="none"
+      >
+        {/* hood/hair back */}
+        <ellipse cx="85" cy="78" rx="58" ry="52" fill="#6E5FBF" />
+        {/* face */}
+        <ellipse cx="85" cy="66" rx="40" ry="38" fill="#F7C9A0" />
+        {/* hair front */}
+        <path
+          d="M45 60 C 40 25, 130 25, 125 60 C 118 45, 100 38, 85 40 C 70 38, 52 45, 45 60 Z"
+          fill="#4A3A2A"
+        />
+        <circle cx="60" cy="35" r="9" fill="#4A3A2A" />
+        <circle cx="110" cy="35" r="9" fill="#4A3A2A" />
+        {/* blush */}
+        <ellipse cx="62" cy="74" rx="7" ry="5" fill="#F7A98C" opacity="0.7" />
+        <ellipse cx="108" cy="74" rx="7" ry="5" fill="#F7A98C" opacity="0.7" />
+        {/* eyes - one winking */}
+        <path
+          d="M55 62 Q 62 56 69 62"
+          stroke="#3A2E22"
+          strokeWidth="3.5"
+          strokeLinecap="round"
+          fill="none"
+        />
+        <circle cx="107" cy="63" r="4.5" fill="#3A2E22" />
+        {/* smile */}
+        <path
+          d="M75 84 Q 85 92 95 84"
+          stroke="#3A2E22"
+          strokeWidth="3.5"
+          strokeLinecap="round"
+          fill="none"
+        />
+        {/* hoodie shoulders + arms resting on card edge */}
+        <path
+          d="M20 150 C 20 100, 45 88, 85 88 C 125 88, 150 100, 150 150 Z"
+          fill="#8B7BDC"
+        />
+        <ellipse cx="42" cy="118" rx="16" ry="13" fill="#8B7BDC" />
+        <ellipse cx="128" cy="118" rx="16" ry="13" fill="#8B7BDC" />
+        <ellipse cx="38" cy="128" rx="11" ry="9" fill="#F7C9A0" />
+        <ellipse cx="132" cy="128" rx="11" ry="9" fill="#F7C9A0" />
+      </svg>
+    </div>
+  );
+}
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [btnState, setBtnState] = useState("idle"); // idle | loading | success | error
   const navigate = useNavigate();
 
@@ -274,9 +339,9 @@ export default function Login() {
   const getBtnStyle = () => {
     const base = { ...styles.btn };
     if (btnState === "error")
-      base.background = "linear-gradient(135deg, #E24B4A, #D85A30)";
+      base.background = "linear-gradient(135deg, #E88A7D, #D96B5A)";
     if (btnState === "success")
-      base.background = "linear-gradient(135deg, #1D9E75, #3B6D11)";
+      base.background = "linear-gradient(135deg, #6FC79A, #4FAE7E)";
     return base;
   };
 
@@ -284,37 +349,15 @@ export default function Login() {
     if (btnState === "loading")
       return (
         <>
-          <span className="btn-shine" />
-          <i
-            className="ti ti-loader-2"
-            style={{ fontSize: 18, animation: "spin 0.8s linear infinite" }}
-          />
+          <span style={{ display: "inline-flex", animation: "spin 0.8s linear infinite" }}>
+            ⏳
+          </span>
           Signing in…
         </>
       );
-    if (btnState === "success")
-      return (
-        <>
-          <span className="btn-shine" />
-          <i className="ti ti-circle-check" style={{ fontSize: 18 }} />
-          Success!
-        </>
-      );
-    if (btnState === "error")
-      return (
-        <>
-          <span className="btn-shine" />
-          <i className="ti ti-alert-circle" style={{ fontSize: 18 }} />
-          Check your details
-        </>
-      );
-    return (
-      <>
-        <span className="btn-shine" />
-        <i className="ti ti-login" style={{ fontSize: 18 }} />
-        Sign in
-      </>
-    );
+    if (btnState === "success") return <>✓ Success!</>;
+    if (btnState === "error") return <>! Check your details</>;
+    return <>Login</>;
   };
 
   const login = async () => {
@@ -347,92 +390,100 @@ export default function Login() {
 
   return (
     <div style={styles.wrap}>
-      <div style={styles.card}>
-        <div style={styles.glowTop} />
-        <div style={styles.glowBottom} />
+      {/* decorative clouds */}
+      <div style={{ ...styles.cloud, width: 70, height: 40, top: "12%", left: "8%" }} />
+      <div style={{ ...styles.cloud, width: 50, height: 30, top: "20%", right: "10%", animationDelay: "1.5s" }} />
+      <div style={{ ...styles.cloud, width: 90, height: 50, bottom: "18%", right: "6%", animationDelay: "0.8s" }} />
 
-        {/* Logo */}
-        <div style={styles.logo}>
-          <div style={styles.logoMark}>⚡</div>
-          <span style={styles.logoText}>Nexus</span>
-        </div>
+      <PlantPot side="left" />
+      <PlantPot side="right" />
 
-        {/* Badge */}
-        <div style={styles.pill}>🔒 Secure login</div>
+      <div style={styles.cardOuter}>
+        <Character />
+        <div style={styles.card}>
+          <div style={styles.headWrap}>
+            <h1 style={styles.title}>✨ Welcome Back ✨</h1>
+            <p style={styles.sub}>Login to continue your journey</p>
+          </div>
 
-        <h1 style={styles.title}>Welcome back</h1>
-        <p style={styles.sub}>Sign in to continue to your desktop</p>
+          {/* Email */}
+          <div style={styles.fieldWrap}>
+            <span style={styles.fieldIconWrap}>👤</span>
+            <input
+              id="email"
+              className="login-input"
+              style={styles.input}
+              type="email"
+              placeholder="Email or Username"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && login()}
+            />
+          </div>
 
-        {/* Email */}
-        <label style={styles.label} htmlFor="email">
-          Email
-        </label>
-        <div style={styles.fieldWrap}>
-          <span style={styles.fieldIcon}>✉</span>
-          <input
-            id="email"
-            className="login-input"
-            style={styles.input}
-            type="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && login()}
-          />
-        </div>
+          {/* Password */}
+          <div style={styles.fieldWrap}>
+            <span style={styles.fieldIconWrap}>🔒</span>
+            <input
+              id="password"
+              className="login-input"
+              style={styles.input}
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && login()}
+            />
+            <button
+              type="button"
+              style={styles.eyeToggle}
+              onClick={() => setShowPassword((s) => !s)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? "🙈" : "👁"}
+            </button>
+          </div>
 
-        {/* Password */}
-        <label style={styles.label} htmlFor="password">
-          Password
-        </label>
-        <div style={styles.fieldWrap}>
-          <span style={styles.fieldIcon}>🔑</span>
-          <input
-            id="password"
-            className="login-input"
-            style={styles.input}
-            type="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && login()}
-          />
-        </div>
-
-        <button style={styles.forgot}>Forgot password?</button>
-
-        {/* Login button */}
-        <button
-          className="login-btn"
-          style={getBtnStyle()}
-          onClick={login}
-          disabled={btnState === "loading" || btnState === "success"}
-        >
-          {getBtnContent()}
-        </button>
-
-        {/* Divider */}
-        <div style={styles.dividerWrap}>
-          <div style={styles.dividerLine} />
-          <span style={styles.dividerText}>or continue with</span>
-          <div style={styles.dividerLine} />
-        </div>
-
-        {/* Social */}
-        <div style={styles.socialRow}>
-          <button className="login-social-btn" style={styles.socialBtn}>
-            G Google
+          <button style={styles.forgot} type="button">
+            Forgot Password?
           </button>
-          <button className="login-social-btn" style={styles.socialBtn}>
-            ⬡ GitHub
-          </button>
-        </div>
 
-        <div style={styles.signupRow}>
-          Don't have an account?{" "}
-          <a href="/signup" style={styles.signupLink}>
-            Sign up
-          </a>
+          {/* Login button */}
+          <button
+            className="login-btn"
+            style={getBtnStyle()}
+            onClick={login}
+            disabled={btnState === "loading" || btnState === "success"}
+          >
+            {getBtnContent()}
+          </button>
+
+          {/* Divider */}
+          <div style={styles.dividerWrap}>
+            <div style={styles.dividerLine} />
+            <span style={styles.dividerText}>or continue with</span>
+            <div style={styles.dividerLine} />
+          </div>
+
+          {/* Social */}
+          <div style={styles.socialRow}>
+            <button className="login-social-btn" style={styles.socialBtn} aria-label="Continue with Google">
+              G
+            </button>
+            <button className="login-social-btn" style={styles.socialBtn} aria-label="Continue with Apple">
+              
+            </button>
+            <button className="login-social-btn" style={styles.socialBtn} aria-label="Continue with Facebook">
+              f
+            </button>
+          </div>
+
+          <div style={styles.signupRow}>
+            Don't have an account?{" "}
+            <a href="/signup" style={styles.signupLink}>
+              Sign Up
+            </a>
+          </div>
         </div>
       </div>
     </div>
