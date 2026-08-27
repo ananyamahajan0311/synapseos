@@ -1,35 +1,49 @@
+# =========================
 # Python
+# =========================
 __pycache__/
 *.py[cod]
 *.pyo
 
-# Environment
+# =========================
+# Environment / Secrets
+# =========================
 .env
 backend/.env
+credentials.json
+backend/credentials.json
+token.json
+backend/token.json
 
-# Virtual environments
+# =========================
+# Virtual Environments
+# =========================
 venv/
 .venv/
 
+# =========================
 # Database
+# =========================
 *.db
 
-# Test files
-backend/test_gemini.py
-backend/list_models.py
-
-# Python
-__pycache__/
-*.py[cod]
-
-# Environment
-.env
-backend/.env
-
+# =========================
 # Node
+# =========================
 node_modules/
 frontend/node_modules/
 
+# =========================
 # Build
+# =========================
 dist/
 build/
+
+# =========================
+# Test / Development Files
+# =========================
+backend/test_gemini.py
+backend/list_models.py
+
+# Local database
+backend/synapseos.db
+**/*.db

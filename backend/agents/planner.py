@@ -113,6 +113,20 @@ class Planner:
                     "input": prompt
                 }
             ]
+        # ---------------- Gmail Search ----------------
+        if (
+            "search email" in text
+            or "search emails" in text
+            or "search my emails" in text
+            or "find email" in text
+            or "find emails" in text
+            or "emails from" in text
+            or "emails about" in text
+        ):
+             return [{
+        "tool": "gmail_search",
+        "input": prompt
+    }]
 
         # ============================================================
         # BROWSER
