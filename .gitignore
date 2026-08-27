@@ -1,7 +1,7 @@
 __pycache__/
-*.py[cod]
+*.pyc
+*.pyo
 .env
 backend/.env
-backend/token.json
 backend/credentials.json
 backend/token.json
