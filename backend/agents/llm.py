@@ -66,3 +66,35 @@ Generate the final document content now.
     )
 
     return response.text
+
+def generate_email(prompt):
+    response = client.models.generate_content(
+        model="gemini-3.6-flash",
+        contents=f"""
+You are the email-writing assistant for SynapseOS.
+
+The user wants to send an email.
+
+USER REQUEST:
+{prompt}
+
+Your task:
+- Understand what the user wants to communicate.
+- Write the actual email.
+- Create an appropriate subject.
+- Keep the email professional and natural.
+- Follow the user's requested tone, length, and purpose.
+
+Return ONLY this exact format:
+
+SUBJECT: <email subject>
+
+BODY:
+<complete email body>
+
+Do not add explanations.
+Do not use Markdown code blocks.
+""",
+    )
+
+    return response.text
