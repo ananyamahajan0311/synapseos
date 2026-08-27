@@ -1,3 +1,4 @@
+import re
 from tools.calculator import calculate
 from tools.datetime_tool import get_datetime
 from tools.browser import open_google
@@ -8,6 +9,7 @@ from tools.calendar_tool import (
 )
 
 from agents.chat_agent import chat_with_ai
+from agents.llm import generate_email
 
 from tools.calendar_list import list_events
 from tools.calendar_delete import delete_event
@@ -214,72 +216,80 @@ class Executor:
                     tool_input
                 )
 
+                # Extract recipient from the user's request
                 email = parse_email_command(
                     tool_input
                 )
 
                 print(
-                    "Parsed email:",
-                    email
+                    "Recipient:",
+                    email["to"]
                 )
 
-                # If another tool created something,
-                # include its URL in the email.
-                if (
-                    spreadsheet_url
-                    or calendar_url
-                    or document_url
-                ):
-
-                    if not email["subject"]:
-
-                        email["subject"] = (
-                            "SynapseOS Task Update"
-                        )
-
-                    email["body"] = (
-                        "Hello,\n\n"
-                        "The requested task has been "
-                        "completed using SynapseOS.\n\n"
-                    )
-
-                    if spreadsheet_url:
-
-                        email["body"] += (
-                            f"Spreadsheet: "
-                            f"{spreadsheet_url}\n\n"
-                        )
-
-                    if calendar_url:
-
-                        email["body"] += (
-                            f"Calendar Event: "
-                            f"{calendar_url}\n\n"
-                        )
-
-                    if document_url:
-
-                        email["body"] += (
-                            f"Google Document: "
-                            f"{document_url}\n\n"
-                        )
-
-                    email["body"] += (
-                        "Regards,\n"
-                        "SynapseOS"
-                    )
-
-                result = send_email(
-                    email["to"],
-                    email["subject"],
-                    email["body"]
+                # Generate subject and body using Gemini
+                generated_email = generate_email(
+                    tool_input
                 )
 
                 print(
-                    "Gmail result:",
-                    result
+                    "Generated email:",
+                    generated_email
                 )
 
+                # Extract subject
+                subject_match = re.search(
+                    r"SUBJECT:\s*(.*)",
+                    generated_email,
+                    re.IGNORECASE
+                )
+
+                subject = ""
+
+                if subject_match:
+                    subject = subject_match.group(1).strip()
+
+                # Extract body
+                body_match = re.search(
+                    r"BODY:\s*(.*)",
+                    generated_email,
+                    re.IGNORECASE | re.DOTALL
+                )
+
+                body = ""
+
+                if body_match:
+                    body = body_match.group(1).strip()
+
+                # Fallback to the original parsed values
+                if not subject:
+                    subject = email["subject"]
+
+                if not body:
+                    body = email["body"]
+
+                # Make sure recipient exists
+                if not email["to"]:
+
+                    result = {
+                        "status": "error",
+                        "message": (
+                            "I need a recipient email address "
+                            "to send the email."
+                        )
+                    }
+
+                else:
+
+                    result = send_email(
+                        email["to"],
+                        subject,
+                        body
+                    )
+
+                    print(
+                        "Gmail result:",
+                        result
+                    )
             # ==================================================
             # GOOGLE DOCS CREATE
             # ==================================================
