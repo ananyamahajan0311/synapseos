@@ -5,112 +5,131 @@ from agents.llm import generate_plan
 class Planner:
 
     def __init__(self):
-        with open("prompts/planner_prompt.txt", "r", encoding="utf-8") as f:
+        with open(
+            "prompts/planner_prompt.txt",
+            "r",
+            encoding="utf-8"
+        ) as f:
             self.system_prompt = f.read()
 
     def plan(self, prompt):
+
         text = prompt.lower()
 
-        # ---------------- Calculator ----------------
-        if "calculate" in text or any(
-            op in text for op in ["+", "-", "*", "/"]
-        ):
-            return [{
-                "tool": "calculator",
-                "input": prompt
-            }]
+        # ============================================================
+        # EMAIL + CALENDAR WORKFLOW
+        # Example:
+        # "Mail my friend about meeting tomorrow at 3 pm
+        #  and schedule it on my calendar"
+        # ============================================================
 
-        # ---------------- Date & Time ----------------
-        if "time" in text or "date" in text:
-            return [{
-                "tool": "datetime",
-                "input": ""
-            }]
-
-        # ---------------- Gmail → Calendar Workflow ----------------
         if (
-            (
-                "email" in text
-                or "gmail" in text
-                )
-                and (
-                    "calendar" in text
-                    or "schedule" in text
-                    or "meeting" in text
-                    )
-                    ):
-            return [
-                {
-                    "tool": "gmail_search",
-                    "input": text
-                    },
-                    {
-                        "tool": "calendar_create_from_email",
-                       "input": ""
-        }
-    ]
-        # ---------------- Calendar List ----------------
-        if (
-            "show my calendar" in text
-            or "upcoming events" in text
-            or "meetings" in text
-        ):
-            return [{
-                "tool": "calendar_list",
-                "input": ""
-            }]
-
-        # ---------------- Calendar + Gmail Workflow ----------------
-        if (
-            ("schedule" in text
-             or "create event" in text
-             or "meeting" in text)
+            ("email" in text or "mail" in text or "gmail" in text)
             and
-            ("email it" in text
-             or "email the" in text
-             or "send it" in text)
+            ("calendar" in text or "schedule" in text)
         ):
             return [
                 {
-                    "tool": "calendar_create",
+                    "tool": "gmail_send",
                     "input": prompt
                 },
                 {
-                    "tool": "gmail_send",
+                    "tool": "calendar_create",
                     "input": prompt
                 }
             ]
 
-        # ---------------- Calendar Create ----------------
-        if (
-            "schedule" in text
-            or "create event" in text
-            or "add event" in text
-        ):
-            return [{
-                "tool": "calendar_create",
-                "input": prompt
-            }]
+        # ============================================================
+        # CALCULATOR
+        # ============================================================
 
-        # ---------------- Calendar Delete ----------------
+        if "calculate" in text or any(
+            op in text for op in ["+", "-", "*", "/"]
+        ):
+            return [
+                {
+                    "tool": "calculator",
+                    "input": prompt
+                }
+            ]
+
+        # ============================================================
+        # DATE & TIME
+        # ============================================================
+
+        if "time" in text or "date" in text:
+            return [
+                {
+                    "tool": "datetime",
+                    "input": ""
+                }
+            ]
+
+        # ============================================================
+        # CALENDAR LIST
+        # ============================================================
+
+        if (
+            "show my calendar" in text
+            or "upcoming events" in text
+            or "my calendar" in text
+        ):
+            return [
+                {
+                    "tool": "calendar_list",
+                    "input": ""
+                }
+            ]
+
+        # ============================================================
+        # CALENDAR DELETE
+        # ============================================================
+
         if (
             "delete event" in text
             or "cancel meeting" in text
             or "remove event" in text
         ):
-            return [{
-                "tool": "calendar_delete",
-                "input": prompt
-            }]
+            return [
+                {
+                    "tool": "calendar_delete",
+                    "input": prompt
+                }
+            ]
 
-        # ---------------- Browser ----------------
+        # ============================================================
+        # CALENDAR CREATE
+        # ============================================================
+
+        if (
+            "schedule" in text
+            or "create event" in text
+            or "add event" in text
+            or "add to my calendar" in text
+        ):
+            return [
+                {
+                    "tool": "calendar_create",
+                    "input": prompt
+                }
+            ]
+
+        # ============================================================
+        # BROWSER
+        # ============================================================
+
         if "search" in text or "open" in text:
-            return [{
-                "tool": "browser",
-                "input": prompt
-            }]
+            return [
+                {
+                    "tool": "browser",
+                    "input": prompt
+                }
+            ]
 
-        # ---------------- Gmail Read ----------------
+        # ============================================================
+        # GMAIL READ
+        # ============================================================
+
         if (
             "read my emails" in text
             or "latest emails" in text
@@ -119,34 +138,17 @@ class Planner:
             or "inbox" in text
             or "unread emails" in text
         ):
-            return [{
-                "tool": "gmail_read",
-                "input": ""
-            }]
-
-        # ---------------- Gmail → Calendar Workflow ----------------
-        if (
-            (
-        "email" in text
-        or "gmail" in text
-        )
-        and (
-            "calendar" in text
-            or "schedule" in text
-            or "meeting" in text
-            )
-            ):
             return [
                 {
-                    "tool": "gmail_search",
-                    "input": text
-                    },
-                    {
-                        "tool": "calendar_create_from_email",
-                        "input": ""
-                        }
-                        ]
-        # ---------------- Gmail Search ----------------
+                    "tool": "gmail_read",
+                    "input": ""
+                }
+            ]
+
+        # ============================================================
+        # GMAIL SEARCH
+        # ============================================================
+
         if (
             "search email" in text
             or "search emails" in text
@@ -155,18 +157,25 @@ class Planner:
             or "emails from" in text
             or "emails about" in text
         ):
-            return [{
-                "tool": "gmail_search",
-                "input": prompt
-            }]
+            return [
+                {
+                    "tool": "gmail_search",
+                    "input": prompt
+                }
+            ]
 
-        # ---------------- Sheets + Gmail Workflow ----------------
+        # ============================================================
+        # SHEETS + GMAIL
+        # ============================================================
+
         if (
             "spreadsheet" in text
             and
-            ("email it" in text
-             or "email the" in text
-             or "send it" in text)
+            (
+                "email it" in text
+                or "email the" in text
+                or "send it" in text
+            )
         ):
             return [
                 {
@@ -179,8 +188,10 @@ class Planner:
                 }
             ]
 
-        # ---------------- Docs + Gmail Workflow ----------------
-        # IMPORTANT: This MUST come before Gmail Send.
+        # ============================================================
+        # DOCS + GMAIL
+        # ============================================================
+
         if (
             (
                 "document" in text
@@ -207,19 +218,28 @@ class Planner:
                 }
             ]
 
-        # ---------------- Gmail Send ----------------
+        # ============================================================
+        # GMAIL SEND
+        # ============================================================
+
         if (
             "send email" in text
             or "send an email" in text
             or "compose email" in text
             or "email " in text
+            or text.startswith("mail ")
         ):
-            return [{
-                "tool": "gmail_send",
-                "input": prompt
-            }]
+            return [
+                {
+                    "tool": "gmail_send",
+                    "input": prompt
+                }
+            ]
 
-        # ---------------- Google Docs ----------------
+        # ============================================================
+        # GOOGLE DOCS
+        # ============================================================
+
         if (
             "document" in text
             or "google doc" in text
@@ -228,12 +248,17 @@ class Planner:
             or "create doc" in text
             or "new document" in text
         ):
-            return [{
-                "tool": "docs_create",
-                "input": prompt
-            }]
+            return [
+                {
+                    "tool": "docs_create",
+                    "input": prompt
+                }
+            ]
 
-        # ---------------- Google Docs List ----------------
+        # ============================================================
+        # GOOGLE DOCS LIST
+        # ============================================================
+
         if (
             "show my documents" in text
             or "list my documents" in text
@@ -241,24 +266,33 @@ class Planner:
             or "my google docs" in text
             or "show my docs" in text
         ):
-            return [{
-                "tool": "docs_list",
-                "input": ""
-            }]
+            return [
+                {
+                    "tool": "docs_list",
+                    "input": ""
+                }
+            ]
 
-        # ---------------- Google Sheets ----------------
+        # ============================================================
+        # GOOGLE SHEETS
+        # ============================================================
+
         if (
             "spreadsheet" in text
-            or "sheet" in text
             or "google sheet" in text
             or "google spreadsheet" in text
         ):
-            return [{
-                "tool": "sheets_create",
-                "input": prompt
-            }]
+            return [
+                {
+                    "tool": "sheets_create",
+                    "input": prompt
+                }
+            ]
 
-        # ---------------- Gemini Fallback ----------------
+        # ============================================================
+        # GEMINI FALLBACK
+        # ============================================================
+
         response = generate_plan(
             prompt,
             self.system_prompt
@@ -272,6 +306,7 @@ class Planner:
         )
 
         try:
+
             plan = json.loads(response)
 
             if isinstance(plan, dict):
@@ -280,7 +315,10 @@ class Planner:
             return plan
 
         except Exception:
-            return [{
-                "tool": "chat",
-                "input": prompt
-            }]
+
+            return [
+                {
+                    "tool": "chat",
+                    "input": prompt
+                }
+            ]

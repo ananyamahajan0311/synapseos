@@ -8,18 +8,56 @@ def parse_email_command(command):
         "body": ""
     }
 
-    # Recipient
-    match = re.search(r"to\s+([^\s]+@[^\s]+)", command, re.IGNORECASE)
+    # ============================================================
+    # RECIPIENT
+    # Supports:
+    # "to abc@gmail.com"
+    # "mail abc@gmail.com"
+    # "email abc@gmail.com"
+    # ============================================================
+
+    match = re.search(
+        r"(?:to|mail|email)\s+(?:my\s+friend\s+)?([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})",
+        command,
+        re.IGNORECASE
+    )
+
     if match:
         result["to"] = match.group(1)
 
-    # Subject
-    match = re.search(r"subject\s+(.*?)\s+body", command, re.IGNORECASE)
+    else:
+        # Fallback: find any email address in the command
+        match = re.search(
+            r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}",
+            command
+        )
+
+        if match:
+            result["to"] = match.group(0)
+
+    # ============================================================
+    # SUBJECT
+    # ============================================================
+
+    match = re.search(
+        r"subject\s+(.*?)\s+body",
+        command,
+        re.IGNORECASE
+    )
+
     if match:
         result["subject"] = match.group(1).strip()
 
-    # Body
-    match = re.search(r"body\s+(.*)", command, re.IGNORECASE)
+    # ============================================================
+    # BODY
+    # ============================================================
+
+    match = re.search(
+        r"body\s+(.*)",
+        command,
+        re.IGNORECASE
+    )
+
     if match:
         result["body"] = match.group(1).strip()
 

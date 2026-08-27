@@ -80,8 +80,10 @@ def create_event_from_email(email_text):
     title = parsed["title"]
     start = parsed["start"]
 
-    # Default meeting duration: 1 hour
-    end = start + timedelta(hours=1)
+    # Use AI-detected duration, default to 1 hour
+    duration = parsed.get("duration", 60)
+
+    end = start + timedelta(minutes=duration)
 
     event = {
         "summary": title,

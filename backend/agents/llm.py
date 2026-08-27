@@ -98,3 +98,38 @@ Do not use Markdown code blocks.
     )
 
     return response.text
+
+def generate_meeting_details(email_text):
+    response = client.models.generate_content(
+        model="gemini-3.6-flash",
+        contents=f"""
+You are the meeting extraction assistant for SynapseOS.
+
+Read the email below and determine whether it contains
+a meeting/event that should be added to Google Calendar.
+
+EMAIL:
+{email_text}
+
+Extract:
+- meeting title
+- date
+- start time
+- duration in minutes
+
+Return ONLY this exact format:
+
+TITLE: <meeting title>
+DATE: <date>
+TIME: <start time>
+DURATION: <duration in minutes>
+
+If a value cannot be determined, write:
+UNKNOWN
+
+Do not explain your reasoning.
+Do not use Markdown.
+""",
+    )
+
+    return response.text
