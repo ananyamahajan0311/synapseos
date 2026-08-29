@@ -5,3 +5,5 @@ __pycache__/
 backend/.env
 backend/credentials.json
 backend/token.json
+
+backend/synapseos.db
