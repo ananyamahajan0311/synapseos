@@ -9,7 +9,12 @@ from tools.calendar_tool import (
 )
 
 from agents.chat_agent import chat_with_ai
-from agents.llm import generate_email
+from agents.llm import (
+    generate_content,
+    generate_email,
+    generate_meeting_details,
+    summarize_emails
+)
 
 from tools.calendar_list import list_events
 from tools.calendar_delete import delete_event
@@ -172,16 +177,23 @@ class Executor:
             # ==================================================
 
             elif tool == "gmail_read":
-
-                result = read_emails()
-
-                # Save email content for another tool
-                if result.get("status") == "success":
-
-                    email_content = result.get(
-                        "message",
-                        ""
+                max_results = 5
+                if tool_input:
+                    try:
+                        max_results = int(tool_input)
+                    except ValueError:
+                        max_results = 5
+                
+                result = read_emails(
+                    max_results=max_results
                     )
+
+    # Save email content for another tool
+                if result.get("status") == "success":
+                    email_content = result.get(
+                          "message",
+            ""
+        )
 
             # ==================================================
             # GMAIL SEARCH
@@ -200,6 +212,24 @@ class Executor:
                      email_content = result.get("message", "")
                      print("\n========== EMAIL CONTENT SAVED ==========")
                      print(email_content)
+
+            elif tool == "email_summarize":
+                if email_content:
+                    summary = summarize_emails(
+                       email_content
+                       )
+                    result = {
+            "status": "success",
+            "message": summary
+        }
+                else:
+                    result = {
+            "status": "error",
+            "message": (
+                "No email content available "
+                "to summarize."
+            )
+        }
 
             # ==================================================
             # GMAIL SEND
@@ -227,9 +257,32 @@ class Executor:
                 )
 
                 # Generate subject and body using Gemini
+                if spreadsheet_url:
+                     email_prompt = f"""
+The user wants to send an email.
+
+USER REQUEST:
+{tool_input}
+
+A Google Spreadsheet has already been created successfully.
+
+SPREADSHEET URL:
+{spreadsheet_url}
+
+Write a short professional email to the requested recipient.
+
+IMPORTANT:
+- Do NOT recreate or list the MCQs in the email.
+- Do NOT generate spreadsheet content again.
+- Tell the recipient that the requested spreadsheet has been created.
+- Include the spreadsheet URL exactly as provided above.
+- Return the email using the normal SUBJECT and BODY format.
+"""
+                else:
+                      email_prompt = tool_input
                 generated_email = generate_email(
-                    tool_input
-                )
+    email_prompt
+)
 
                 print(
                     "Generated email:",

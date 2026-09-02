@@ -133,3 +133,35 @@ Do not use Markdown.
     )
 
     return response.text
+def summarize_emails(email_text):
+    response = client.models.generate_content(
+        model="gemini-3.6-flash",
+        contents=f"""
+You are the email summarization assistant for SynapseOS.
+
+The following text contains emails retrieved from the user's Gmail.
+
+EMAILS:
+{email_text}
+
+Summarize the emails clearly and concisely.
+
+Include:
+- The main topic
+- Important dates and times
+- Important people or senders
+- Important actions or decisions
+- Any other important information
+
+If there are multiple emails, combine related information
+and avoid unnecessary repetition.
+
+Use simple, easy-to-read language.
+
+Return ONLY the summary.
+Do not explain your reasoning.
+Do not mention that you are an AI.
+""",
+    )
+
+    return response.text

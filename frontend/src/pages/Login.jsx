@@ -374,6 +374,7 @@ export default function Login() {
         body: JSON.stringify({ email, password }),
       });
       const data = await response.json();
+      console.log("LOGIN RESPONSE:", data);
       if (data.access_token) {
         localStorage.setItem("token", data.access_token);
         setBtnState("success");

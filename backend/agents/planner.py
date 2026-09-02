@@ -14,13 +14,91 @@ class Planner:
 
     def plan(self, prompt):
 
-        text = prompt.lower()
+        text = prompt.lower().strip()
+
+        # ============================================================
+        # EMAIL SUMMARIZATION
+        # ============================================================
+
+        if (
+            ("summarize" in text or "summary" in text)
+            and
+            ("email" in text or "emails" in text or "mail" in text)
+        ):
+
+            # One latest email
+            if (
+                "latest email" in text
+                or "last email" in text
+                or "most recent email" in text
+            ):
+                return [
+                    {
+                        "tool": "gmail_read",
+                        "input": "1"
+                    },
+                    {
+                        "tool": "email_summarize",
+                        "input": prompt
+                    }
+                ]
+
+            # Multiple latest emails
+            return [
+                {
+                    "tool": "gmail_read",
+                    "input": "5"
+                },
+                {
+                    "tool": "email_summarize",
+                    "input": prompt
+                }
+            ]
+
+        # ============================================================
+        # SHEETS + GMAIL
+        # ============================================================
+                
+        if (
+            ("spreadsheet" in text
+             or "google sheet" in text
+             or "google sheets" in text)
+            and
+            ("email" in text
+             or "send" in text
+             or "mail" in text)
+        ):
+                    return [
+                {
+                    "tool": "sheets_create",
+                    "input": prompt
+                },
+                {
+                    "tool": "gmail_send",
+                    "input": prompt
+                }
+            ]
+
+        # ============================================================
+        # GMAIL SEND
+        # ============================================================
+
+        if (
+            "send an email" in text
+            or "send email" in text
+            or "compose email" in text
+            or text.startswith("email ")
+            or text.startswith("mail ")
+        ):
+            return [
+                {
+                    "tool": "gmail_send",
+                    "input": prompt
+                }
+            ]
 
         # ============================================================
         # EMAIL + CALENDAR WORKFLOW
-        # Example:
-        # "Mail my friend about meeting tomorrow at 3 pm
-        #  and schedule it on my calendar"
         # ============================================================
 
         if (
@@ -43,8 +121,11 @@ class Planner:
         # CALCULATOR
         # ============================================================
 
-        if "calculate" in text or any(
-            op in text for op in ["+", "-", "*", "/"]
+        if (
+            "calculate" in text
+            or "what is" in text and any(
+                op in text for op in ["+", "-", "*", "/"]
+            )
         ):
             return [
                 {
@@ -57,26 +138,17 @@ class Planner:
         # DATE & TIME
         # ============================================================
 
-        if "time" in text or "date" in text:
-            return [
-                {
-                    "tool": "datetime",
-                    "input": ""
-                }
-            ]
-
-        # ============================================================
-        # CALENDAR LIST
-        # ============================================================
-
         if (
-            "show my calendar" in text
-            or "upcoming events" in text
-            or "my calendar" in text
+            "what time" in text
+            or "current time" in text
+            or "today's date" in text
+            or "current date" in text
+            or text == "time"
+            or text == "date"
         ):
             return [
                 {
-                    "tool": "calendar_list",
+                    "tool": "datetime",
                     "input": ""
                 }
             ]
@@ -89,11 +161,30 @@ class Planner:
             "delete event" in text
             or "cancel meeting" in text
             or "remove event" in text
+            or "delete meeting" in text
         ):
             return [
                 {
                     "tool": "calendar_delete",
                     "input": prompt
+                }
+            ]
+
+        # ============================================================
+        # CALENDAR LIST
+        # ============================================================
+
+        if (
+            "show my calendar" in text
+            or "show calendar" in text
+            or "upcoming events" in text
+            or "my calendar" in text
+            or "calendar events" in text
+        ):
+            return [
+                {
+                    "tool": "calendar_list",
+                    "input": ""
                 }
             ]
 
@@ -106,36 +197,11 @@ class Planner:
             or "create event" in text
             or "add event" in text
             or "add to my calendar" in text
+            or "create a meeting" in text
         ):
             return [
                 {
                     "tool": "calendar_create",
-                    "input": prompt
-                }
-            ]
-        # ---------------- Gmail Search ----------------
-        if (
-            "search email" in text
-            or "search emails" in text
-            or "search my emails" in text
-            or "find email" in text
-            or "find emails" in text
-            or "emails from" in text
-            or "emails about" in text
-        ):
-             return [{
-        "tool": "gmail_search",
-        "input": prompt
-    }]
-
-        # ============================================================
-        # BROWSER
-        # ============================================================
-
-        if "search" in text or "open" in text:
-            return [
-                {
-                    "tool": "browser",
                     "input": prompt
                 }
             ]
@@ -149,7 +215,8 @@ class Planner:
             or "latest emails" in text
             or "show my emails" in text
             or "show my inbox" in text
-            or "inbox" in text
+            or "show inbox" in text
+            or text == "inbox"
             or "unread emails" in text
         ):
             return [
@@ -159,48 +226,7 @@ class Planner:
                 }
             ]
 
-        # ============================================================
-        # GMAIL SEARCH
-        # ============================================================
-
-        if (
-            "search email" in text
-            or "search emails" in text
-            or "find email" in text
-            or "find emails" in text
-            or "emails from" in text
-            or "emails about" in text
-        ):
-            return [
-                {
-                    "tool": "gmail_search",
-                    "input": prompt
-                }
-            ]
-
-        # ============================================================
-        # SHEETS + GMAIL
-        # ============================================================
-
-        if (
-            "spreadsheet" in text
-            and
-            (
-                "email it" in text
-                or "email the" in text
-                or "send it" in text
-            )
-        ):
-            return [
-                {
-                    "tool": "sheets_create",
-                    "input": prompt
-                },
-                {
-                    "tool": "gmail_send",
-                    "input": prompt
-                }
-            ]
+        
 
         # ============================================================
         # DOCS + GMAIL
@@ -233,43 +259,6 @@ class Planner:
             ]
 
         # ============================================================
-        # GMAIL SEND
-        # ============================================================
-
-        if (
-            "send email" in text
-            or "send an email" in text
-            or "compose email" in text
-            or "email " in text
-            or text.startswith("mail ")
-        ):
-            return [
-                {
-                    "tool": "gmail_send",
-                    "input": prompt
-                }
-            ]
-
-        # ============================================================
-        # GOOGLE DOCS
-        # ============================================================
-
-        if (
-            "document" in text
-            or "google doc" in text
-            or "create a document" in text
-            or "create document" in text
-            or "create doc" in text
-            or "new document" in text
-        ):
-            return [
-                {
-                    "tool": "docs_create",
-                    "input": prompt
-                }
-            ]
-
-        # ============================================================
         # GOOGLE DOCS LIST
         # ============================================================
 
@@ -288,6 +277,25 @@ class Planner:
             ]
 
         # ============================================================
+        # GOOGLE DOCS CREATE
+        # ============================================================
+
+        if (
+            "document" in text
+            or "google doc" in text
+            or "create a document" in text
+            or "create document" in text
+            or "create doc" in text
+            or "new document" in text
+        ):
+            return [
+                {
+                    "tool": "docs_create",
+                    "input": prompt
+                }
+            ]
+
+        # ============================================================
         # GOOGLE SHEETS
         # ============================================================
 
@@ -299,6 +307,23 @@ class Planner:
             return [
                 {
                     "tool": "sheets_create",
+                    "input": prompt
+                }
+            ]
+
+        # ============================================================
+        # BROWSER
+        # ============================================================
+
+        if (
+            "search web" in text
+            or "search online" in text
+            or "open website" in text
+            or "open google" in text
+        ):
+            return [
+                {
+                    "tool": "browser",
                     "input": prompt
                 }
             ]

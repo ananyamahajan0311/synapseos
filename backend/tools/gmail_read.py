@@ -1,33 +1,122 @@
 import base64
-
+import re
+from bs4 import BeautifulSoup
 from googleapiclient.discovery import build
 from services.google_auth import get_credentials
 
 
+def decode_body(data):
+    """Decode Gmail base64 encoded content."""
+    if not data:
+        return ""
+
+    try:
+        return base64.urlsafe_b64decode(data).decode(
+            "utf-8",
+            errors="ignore"
+        )
+    except Exception:
+        return ""
+
+
+def clean_text(text):
+    """Clean unnecessary URLs and email formatting."""
+
+    if not text:
+        return ""
+
+    # Convert HTML to readable text if HTML is present
+    if "<html" in text.lower() or "<body" in text.lower():
+        soup = BeautifulSoup(text, "html.parser")
+
+        for element in soup(["script", "style", "a"]):
+            element.decompose()
+
+        text = soup.get_text(
+            separator="\n",
+            strip=True
+        )
+
+    # Remove long URLs
+    text = re.sub(
+        r'https?://\S+',
+        '',
+        text
+    )
+
+    # Remove excessive blank lines
+    text = re.sub(
+        r'\n\s*\n+',
+        '\n\n',
+        text
+    )
+
+    # Remove excessive spaces
+    text = re.sub(
+        r'[ \t]+',
+        ' ',
+        text
+    )
+
+    return text.strip()
+
+
 def get_email_body(payload):
     """
-    Extract plain-text body from Gmail message payload.
+    Extract the best available email body.
+
+    Priority:
+    1. text/plain
+    2. text/html
+    3. nested multipart sections
     """
 
-    # Simple email with body directly available
-    if payload.get("body", {}).get("data"):
-        data = payload["body"]["data"]
-        return base64.urlsafe_b64decode(data).decode("utf-8")
+    plain_text = ""
+    html_text = ""
 
-    # Multipart email
+    body = payload.get("body", {})
+    data = body.get("data")
+
+    if data:
+
+        decoded = decode_body(data)
+
+        mime_type = payload.get("mimeType", "")
+
+        if mime_type == "text/plain":
+            plain_text = decoded
+
+        elif mime_type == "text/html":
+            html_text = decoded
+
     for part in payload.get("parts", []):
-        if part["mimeType"] == "text/plain":
-            data = part.get("body", {}).get("data")
 
-            if data:
-                return base64.urlsafe_b64decode(data).decode("utf-8")
+        mime_type = part.get("mimeType", "")
+        part_body = part.get("body", {})
+        data = part_body.get("data")
 
-        # Check nested parts
+        if data:
+
+            decoded = decode_body(data)
+
+            if mime_type == "text/plain":
+                plain_text = decoded
+
+            elif mime_type == "text/html":
+                html_text = decoded
+
         if part.get("parts"):
-            body = get_email_body(part)
 
-            if body:
-                return body
+            nested = get_email_body(part)
+
+            if nested:
+                return nested
+
+    if plain_text.strip():
+        return clean_text(plain_text)
+
+    if html_text.strip():
+        return clean_text(html_text)
 
     return ""
 
@@ -75,7 +164,7 @@ def read_emails(max_results=5):
             .execute()
         )
 
-        headers = msg["payload"]["headers"]
+        headers = msg["payload"].get("headers", [])
 
         subject = ""
         sender = ""
@@ -90,10 +179,12 @@ def read_emails(max_results=5):
 
         body = get_email_body(msg["payload"])
 
-        output += f"From: {sender}\n"
-        output += f"Subject: {subject}\n"
-        output += f"Body: {body}\n"
-        output += "\n-------------------------\n\n"
+        output += (
+            f"From: {sender}\n"
+            f"Subject: {subject}\n"
+            f"Body:\n{body}\n"
+            "\n-------------------------\n\n"
+        )
 
     return {
         "status": "success",
