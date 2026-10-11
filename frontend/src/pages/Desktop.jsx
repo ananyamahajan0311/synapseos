@@ -403,84 +403,137 @@ function Desktop() {
     navigate("/");
   };
 
-  const handleSend = async (prompt) => {
-    if (!prompt || !prompt.trim()) return;
+  
+const handleSend = async (prompt) => {
+  if (!prompt || !prompt.trim() || isThinking) return;
+
+  setMessages((prev) => [
+    ...prev,
+    { sender: "user", text: prompt },
+  ]);
+
+  setIsThinking(true);
+
+  try {
+    const response = await fetch("http://127.0.0.1:8000/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ prompt }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.detail || data.message || "Failed to connect to backend."
+      );
+    }
+
+    console.log("Backend Response:", data);
+
+    let botMessage = "";
+    let emailDraft = null;
+
+    if (data.plan && Array.isArray(data.plan)) {
+      data.plan.forEach((step, index) => {
+        if (step.tool !== "chat") {
+          botMessage += `🔧 Step ${index + 1}: ${step.tool}\n`;
+        }
+      });
+
+      if (botMessage) botMessage += "\n";
+    }
+
+    if (data.results && Array.isArray(data.results)) {
+      data.results.forEach((result, index) => {
+        if (result.email_draft) {
+          emailDraft = result.email_draft;
+        }
+
+        botMessage += `✅ Result ${index + 1}\n`;
+        botMessage += `${result.message || "Action completed."}\n\n`;
+      });
+    } else {
+      botMessage += data.message || "No response received.";
+    }
 
     setMessages((prev) => [
       ...prev,
       {
-        sender: "user",
-        text: prompt,
+        sender: "bot",
+        text: botMessage.trim(),
+        ...(emailDraft ? { emailDraft } : {}),
       },
     ]);
+  } catch (error) {
+    console.error("Chat error:", error);
 
-    setIsThinking(true);
+    setMessages((prev) => [
+      ...prev,
+      {
+        sender: "bot",
+        text: `❌ ${error.message || "Unable to connect to SynapseOS backend."}`,
+      },
+    ]);
+  } finally {
+    setIsThinking(false);
+  }
+};
 
-    try {
-      const response = await fetch("http://127.0.0.1:8000/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          prompt,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to connect to backend");
-      }
-
-      const data = await response.json();
-
-      console.log("Backend Response:", data);
-
-      let botMessage = "";
-
-      // Show tools used
-      if (data.plan && Array.isArray(data.plan)) {
-        data.plan.forEach((step, index) => {
-          if (step.tool !== "chat") {
-            botMessage += `🔧 Step ${index + 1}: ${step.tool}\n`;
-          }
-        });
-
-        if (botMessage !== "") {
-          botMessage += "\n";
-        }
-      }
-
-      // Show results
-      if (data.results && Array.isArray(data.results)) {
-        data.results.forEach((result, index) => {
-          botMessage += `✅ Result ${index + 1}\n`;
-          botMessage += `${result.message}\n\n`;
-        });
-      } else {
-        botMessage += "No response received.";
-      }
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          sender: "bot",
-          text: botMessage,
-        },
-      ]);
-    } catch (error) {
-      console.error(error);
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          sender: "bot",
-          text: "❌ Unable to connect to SynapseOS backend.",
-        },
-      ]);
-    } finally {
-      setIsThinking(false);
+const handleApproveDraft = async ({
+  draft_id,
+  to_email,
+  subject,
+  message,
+}) => {
+  const response = await fetch(
+    `http://127.0.0.1:8000/email-drafts/${encodeURIComponent(draft_id)}/send`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        to_email,
+        subject,
+        message,
+      }),
     }
-  };
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.detail || data.message || "Email could not be sent."
+    );
+  }
+
+  window.alert("Email sent successfully!");
+  return data;
+};
+
+const handleCancelDraft = async (draftId) => {
+  const response = await fetch(
+    `http://127.0.0.1:8000/email-drafts/${encodeURIComponent(draftId)}/cancel`,
+    {
+      method: "POST",
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.detail || data.message || "Draft could not be cancelled."
+    );
+  }
+
+  return data;
+};
+
 
   const handleCardKeyDown = (event, prompt) => {
     if (event.key === "Enter" || event.key === " ") {
@@ -516,13 +569,18 @@ function Desktop() {
         <div style={styles.inner}>
 
           {/* Chat */}
-          {messages.map((msg, index) => (
-            <ChatMessage
-              key={index}
-              sender={msg.sender}
-              text={msg.text}
-            />
-          ))}
+          
+{messages.map((msg, index) => (
+  <ChatMessage
+    key={index}
+    sender={msg.sender}
+    text={msg.text}
+    emailDraft={msg.emailDraft}
+    onApprove={handleApproveDraft}
+    onCancel={handleCancelDraft}
+  />
+))}
+
 
           {isThinking && (
             <div style={styles.typingRow} aria-live="polite" aria-label="SynapseOS is thinking">

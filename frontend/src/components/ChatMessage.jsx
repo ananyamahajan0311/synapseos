@@ -1,3 +1,6 @@
+
+import { useState } from "react";
+
 const styles = {
   row: {
     display: "flex",
@@ -19,7 +22,6 @@ const styles = {
   botAvatar: {
     background: "linear-gradient(135deg, #A79AE8, #8B7BDC)",
     color: "#fff",
-    boxShadow: "0 6px 14px -6px rgba(124,109,216,0.5)",
   },
   userAvatar: {
     background: "#EDE7FA",
@@ -31,12 +33,12 @@ const styles = {
     border: "1.5px solid #ECE7F7",
     borderRadius: "22px 22px 22px 6px",
     padding: "12px 18px",
-    maxWidth: "72%",
+    maxWidth: "100%",
     fontSize: "14.5px",
     lineHeight: 1.55,
     fontWeight: 600,
     whiteSpace: "pre-wrap",
-    boxShadow: "0 8px 20px -14px rgba(90,70,140,0.3)",
+    overflowWrap: "anywhere",
   },
   bubbleUser: {
     background: "linear-gradient(135deg, #9C8FE6, #7C6DD8)",
@@ -48,12 +50,105 @@ const styles = {
     lineHeight: 1.55,
     fontWeight: 600,
     whiteSpace: "pre-wrap",
-    boxShadow: "0 10px 22px -10px rgba(124,109,216,0.55)",
+  },
+  field: {
+    display: "block",
+    width: "100%",
+    boxSizing: "border-box",
+    padding: "10px",
+    border: "1px solid #DCD3F0",
+    borderRadius: "9px",
+    font: "inherit",
+    color: "#4A3F6B",
+    background: "#fff",
+  },
+  label: {
+    display: "block",
+    margin: "12px 0 5px",
+    fontSize: "12px",
+    fontWeight: 800,
+  },
+  button: {
+    padding: "9px 13px",
+    borderRadius: "9px",
+    border: "none",
+    cursor: "pointer",
+    fontWeight: 800,
   },
 };
 
-export default function ChatMessage({ sender, text }) {
+export default function ChatMessage({
+  sender,
+  text,
+  emailDraft,
+  onApprove,
+  onCancel,
+}) {
   const isUser = sender === "user";
+
+  const [toEmail, setToEmail] = useState(
+    emailDraft?.to_email || ""
+  );
+  const [subject, setSubject] = useState(
+    emailDraft?.subject || ""
+  );
+  const [body, setBody] = useState(
+    emailDraft?.body || ""
+  );
+
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  const [draftStatus, setDraftStatus] = useState("pending");
+
+  const handleCancel = async () => {
+    if (busy || draftStatus !== "pending") return;
+
+    setBusy(true);
+    setError("");
+
+    try {
+      await onCancel(emailDraft.draft_id);
+      setDraftStatus("cancelled");
+    } catch (err) {
+      setError(err.message || "Could not cancel this draft.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleApprove = async () => {
+    if (busy || draftStatus !== "pending") return;
+
+    if (!toEmail.trim() || !subject.trim() || !body.trim()) {
+      setError("Recipient, subject, and body are required.");
+      return;
+    }
+
+    if (!window.confirm(
+      `Send this email to ${toEmail.trim()}?`
+    )) {
+      return;
+    }
+
+    setBusy(true);
+    setError("");
+
+    try {
+      await onApprove({
+        draft_id: emailDraft.draft_id,
+        to_email: toEmail.trim(),
+        subject: subject.trim(),
+        message: body.trim(),
+      });
+
+      setDraftStatus("sent");
+    } catch (err) {
+      setError(err.message || "Could not send the email.");
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <div
@@ -70,7 +165,134 @@ export default function ChatMessage({ sender, text }) {
       >
         {isUser ? "🙂" : "✨"}
       </div>
-      <div style={isUser ? styles.bubbleUser : styles.bubbleBot}>{text}</div>
+
+      <div style={isUser ? styles.bubbleUser : styles.bubbleBot}>
+        {text}
+
+        {emailDraft && (
+          <div
+            style={{
+              marginTop: "14px",
+              padding: "14px",
+              border: "1px solid #DCD3F0",
+              borderRadius: "14px",
+              background: "#F8F5FF",
+              minWidth: 0,
+            }}
+          >
+            <div style={{ fontSize: "16px", fontWeight: 900 }}>
+              ✉️ Email preview
+            </div>
+
+            <div style={{ fontSize: "12px", marginTop: "4px" }}>
+              Review the complete email before sending.
+            </div>
+
+            <label style={styles.label} htmlFor={`to-${emailDraft.draft_id}`}>
+              To
+            </label>
+            <input
+              id={`to-${emailDraft.draft_id}`}
+              style={styles.field}
+              type="email"
+              value={toEmail}
+              disabled={busy || draftStatus !== "pending"}
+              onChange={(e) => setToEmail(e.target.value)}
+            />
+
+            <label style={styles.label} htmlFor={`subject-${emailDraft.draft_id}`}>
+              Subject
+            </label>
+            <input
+              id={`subject-${emailDraft.draft_id}`}
+              style={styles.field}
+              value={subject}
+              disabled={busy || draftStatus !== "pending"}
+              onChange={(e) => setSubject(e.target.value)}
+            />
+
+            <label style={styles.label} htmlFor={`body-${emailDraft.draft_id}`}>
+              Email body
+            </label>
+            <textarea
+              id={`body-${emailDraft.draft_id}`}
+              style={{
+                ...styles.field,
+                minHeight: "160px",
+                resize: "vertical",
+              }}
+              value={body}
+              disabled={busy || draftStatus !== "pending"}
+              onChange={(e) => setBody(e.target.value)}
+            />
+
+            {emailDraft.validation?.warnings?.map((warning, index) => (
+              <div
+                key={index}
+                style={{
+                  marginTop: "8px",
+                  color: "#8A5A00",
+                  fontSize: "12px",
+                }}
+              >
+                ⚠️ {warning}
+              </div>
+            ))}
+
+            {error && (
+              <div
+                role="alert"
+                style={{ color: "#B42318", marginTop: "10px" }}
+              >
+                {error}
+              </div>
+            )}
+
+            {draftStatus === "pending" ? (
+              <div
+                style={{
+                  display: "flex",
+                  gap: "8px",
+                  flexWrap: "wrap",
+                  marginTop: "14px",
+                }}
+              >
+                <button
+                  type="button"
+                  disabled={busy}
+                  style={{
+                    ...styles.button,
+                    background: "#E7E1F5",
+                    color: "#4A3F6B",
+                  }}
+                  onClick={handleCancel}
+                >
+                  {busy ? "Please wait..." : "Cancel draft"}
+                </button>
+
+                <button
+                  type="button"
+                  disabled={busy}
+                  style={{
+                    ...styles.button,
+                    background: "#7564CB",
+                    color: "#fff",
+                  }}
+                  onClick={handleApprove}
+                >
+                  {busy ? "Processing..." : "Approve & Send"}
+                </button>
+              </div>
+            ) : (
+              <div style={{ marginTop: "12px", fontWeight: 800 }}>
+                {draftStatus === "sent"
+                  ? "✅ Email sent"
+                  : "Draft cancelled"}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
