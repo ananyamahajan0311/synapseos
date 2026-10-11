@@ -1,7 +1,9 @@
 import re
+
 from tools.calculator import calculate
 from tools.datetime_tool import get_datetime
 from tools.browser import open_google
+from services.email_drafts import create_draft
 
 from tools.calendar_tool import (
     create_event,
@@ -9,6 +11,7 @@ from tools.calendar_tool import (
 )
 
 from agents.chat_agent import chat_with_ai
+
 from agents.llm import (
     generate_content,
     generate_email,
@@ -87,7 +90,7 @@ class Executor:
 
                 if result.get("status") == "success":
 
-                    # Prefer the direct URL returned by the tool
+                    # Prefer direct URL returned by tool
                     calendar_url = result.get("calendar_url")
 
                     # Fallback: extract URL from message
@@ -100,10 +103,7 @@ class Executor:
                             if line.startswith("🔗"):
 
                                 calendar_url = (
-                                    line.replace(
-                                        "🔗",
-                                        ""
-                                    ).strip()
+                                    line.replace("🔗", "").strip()
                                 )
 
                                 break
@@ -113,9 +113,12 @@ class Executor:
             # ==================================================
 
             elif tool == "calendar_create_from_email":
+
                 print("\n========== CALENDAR FROM EMAIL ==========")
+
                 print("Email content received:")
                 print(email_content)
+
                 # Use Gmail result if available
                 if email_content:
 
@@ -141,7 +144,9 @@ class Executor:
                             "for calendar creation."
                         )
                     }
+
                     print(result)
+
             # ==================================================
             # CALENDAR LIST
             # ==================================================
@@ -177,23 +182,28 @@ class Executor:
             # ==================================================
 
             elif tool == "gmail_read":
+
                 max_results = 5
+
                 if tool_input:
+
                     try:
                         max_results = int(tool_input)
+
                     except ValueError:
                         max_results = 5
-                
+
                 result = read_emails(
                     max_results=max_results
-                    )
+                )
 
-    # Save email content for another tool
+                # Save email content for another tool
                 if result.get("status") == "success":
+
                     email_content = result.get(
-                          "message",
-            ""
-        )
+                        "message",
+                        ""
+                    )
 
             # ==================================================
             # GMAIL SEARCH
@@ -203,33 +213,51 @@ class Executor:
 
                 result = search_emails(tool_input)
 
-                print("\n========== GMAIL SEARCH RESULT ==========")
-                
+                print(
+                    "\n========== GMAIL SEARCH RESULT =========="
+                )
+
                 print(result)
 
                 if result.get("status") == "success":
 
-                     email_content = result.get("message", "")
-                     print("\n========== EMAIL CONTENT SAVED ==========")
-                     print(email_content)
+                    email_content = result.get(
+                        "message",
+                        ""
+                    )
+
+                    print(
+                        "\n========== EMAIL CONTENT SAVED =========="
+                    )
+
+                    print(email_content)
+
+            # ==================================================
+            # EMAIL SUMMARIZE
+            # ==================================================
 
             elif tool == "email_summarize":
+
                 if email_content:
+
                     summary = summarize_emails(
-                       email_content
-                       )
+                        email_content
+                    )
+
                     result = {
-            "status": "success",
-            "message": summary
-        }
+                        "status": "success",
+                        "message": summary
+                    }
+
                 else:
+
                     result = {
-            "status": "error",
-            "message": (
-                "No email content available "
-                "to summarize."
-            )
-        }
+                        "status": "error",
+                        "message": (
+                            "No email content available "
+                            "to summarize."
+                        )
+                    }
 
             # ==================================================
             # GMAIL SEND
@@ -246,7 +274,7 @@ class Executor:
                     tool_input
                 )
 
-                # Extract recipient from the user's request
+                # Extract recipient from user's request
                 email = parse_email_command(
                     tool_input
                 )
@@ -256,9 +284,38 @@ class Executor:
                     email["to"]
                 )
 
-                # Generate subject and body using Gemini
-                if spreadsheet_url:
-                     email_prompt = f"""
+                # ------------------------------------------------
+                # Prepare email prompt
+                # ------------------------------------------------
+
+                if document_url:
+
+                    email_prompt = f"""
+The user wants to send an email.
+
+USER REQUEST:
+{tool_input}
+
+A Google Doc has already been created successfully.
+
+GOOGLE DOC URL:
+{document_url}
+
+Write a short professional email to the requested recipient.
+
+IMPORTANT:
+- Do NOT recreate the Google Doc content.
+- Do NOT list the key points again.
+- Tell the recipient that the requested Google Doc has been created.
+- Include the Google Doc URL exactly as provided above.
+- Do NOT write "[Link to Google Doc]".
+- Use the actual URL provided above.
+- Return the email using the normal SUBJECT and BODY format.
+"""
+
+                elif spreadsheet_url:
+
+                    email_prompt = f"""
 The user wants to send an email.
 
 USER REQUEST:
@@ -278,18 +335,28 @@ IMPORTANT:
 - Include the spreadsheet URL exactly as provided above.
 - Return the email using the normal SUBJECT and BODY format.
 """
+
                 else:
-                      email_prompt = tool_input
+
+                    email_prompt = tool_input
+
+                # ------------------------------------------------
+                # Generate email using Gemini
+                # ------------------------------------------------
+
                 generated_email = generate_email(
-    email_prompt
-)
+                    email_prompt
+                )
 
                 print(
                     "Generated email:",
                     generated_email
                 )
 
+                # ------------------------------------------------
                 # Extract subject
+                # ------------------------------------------------
+
                 subject_match = re.search(
                     r"SUBJECT:\s*(.*)",
                     generated_email,
@@ -299,9 +366,15 @@ IMPORTANT:
                 subject = ""
 
                 if subject_match:
-                    subject = subject_match.group(1).strip()
 
+                    subject = (
+                        subject_match.group(1).strip()
+                    )
+
+                # ------------------------------------------------
                 # Extract body
+                # ------------------------------------------------
+
                 body_match = re.search(
                     r"BODY:\s*(.*)",
                     generated_email,
@@ -311,16 +384,27 @@ IMPORTANT:
                 body = ""
 
                 if body_match:
-                    body = body_match.group(1).strip()
 
-                # Fallback to the original parsed values
+                    body = (
+                        body_match.group(1).strip()
+                    )
+
+                # ------------------------------------------------
+                # Fallback
+                # ------------------------------------------------
+
                 if not subject:
+
                     subject = email["subject"]
 
                 if not body:
+
                     body = email["body"]
 
+                # ------------------------------------------------
                 # Make sure recipient exists
+                # ------------------------------------------------
+
                 if not email["to"]:
 
                     result = {
@@ -330,19 +414,42 @@ IMPORTANT:
                             "to send the email."
                         )
                     }
+                # ---------------------------------------------
+                # Validate recipient and create pending draft
+                # ---------------------------------------------
+
+                if not email["to"]:
+
+                    result = {
+                        "status": "error",
+                        "message": (
+                            "I need a recipient email address "
+                            "to prepare the email."
+                        )
+                    }
 
                 else:
 
-                    result = send_email(
+                    draft = create_draft(
                         email["to"],
                         subject,
                         body
                     )
 
+                    result = {
+                        "status": "pending_approval",
+                        "message": (
+                            "Email draft prepared for review. "
+                            "It has NOT been sent."
+                        ),
+                        "email_draft": draft
+                    }
+
                     print(
-                        "Gmail result:",
-                        result
+                        "Email draft created:",
+                        draft["draft_id"]
                     )
+            
             # ==================================================
             # GOOGLE DOCS CREATE
             # ==================================================
@@ -355,10 +462,33 @@ IMPORTANT:
 
                 if result.get("status") == "success":
 
-                    document_url = result.get(
+                    message = result.get(
                         "message",
                         ""
-                    ).splitlines()[-1]
+                    )
+
+                    # Extract actual Google Docs URL
+                    urls = re.findall(
+                        r"https://docs\.google\.com/document/\S+",
+                        message
+                    )
+
+                    if urls:
+
+                        document_url = urls[-1]
+
+                    result["document_url"] = (
+                        document_url
+                    )
+
+                    print(
+                        "\n========== GOOGLE DOC CREATED =========="
+                    )
+
+                    print(
+                        "Document URL:",
+                        document_url
+                    )
 
             # ==================================================
             # GOOGLE DOCS LIST
@@ -373,11 +503,26 @@ IMPORTANT:
             # ==================================================
 
             elif tool == "sheets_create":
-                result = create_sheet(tool_input)
-                if result.get("status") == "success":
-                    spreadsheet_url = result.get("url")
 
-                
+                result = create_sheet(
+                    tool_input
+                )
+
+                if result.get("status") == "success":
+
+                    spreadsheet_url = result.get(
+                        "url"
+                    )
+
+                    print(
+                        "\n========== GOOGLE SHEET CREATED =========="
+                    )
+
+                    print(
+                        "Spreadsheet URL:",
+                        spreadsheet_url
+                    )
+
             # ==================================================
             # UNKNOWN TOOL
             # ==================================================
@@ -391,6 +536,7 @@ IMPORTANT:
                     )
                 }
 
+            # Add result of current tool
             results.append(result)
 
         return results
