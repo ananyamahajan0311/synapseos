@@ -404,6 +404,7 @@ function Desktop() {
   };
 
   
+
 const handleSend = async (prompt) => {
   if (!prompt || !prompt.trim() || isThinking) return;
 
@@ -420,14 +421,31 @@ const handleSend = async (prompt) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ prompt }),
+      body: JSON.stringify({ prompt: prompt.trim() }),
     });
 
-    const data = await response.json();
+    let data;
+
+    try {
+      data = await response.json();
+    } catch {
+      throw new Error(
+        response.ok
+          ? "The server returned an invalid response. Please try again."
+          : `The server returned an unexpected response (HTTP ${response.status}).`
+      );
+    }
 
     if (!response.ok) {
+      const detail =
+        typeof data.detail === "string"
+          ? data.detail
+          : typeof data.message === "string"
+            ? data.message
+            : null;
+
       throw new Error(
-        data.detail || data.message || "Failed to connect to backend."
+        detail || `Request failed (HTTP ${response.status}). Please try again.`
       );
     }
 
@@ -436,9 +454,9 @@ const handleSend = async (prompt) => {
     let botMessage = "";
     let emailDraft = null;
 
-    if (data.plan && Array.isArray(data.plan)) {
+    if (Array.isArray(data.plan)) {
       data.plan.forEach((step, index) => {
-        if (step.tool !== "chat") {
+        if (step.tool && step.tool !== "chat") {
           botMessage += `🔧 Step ${index + 1}: ${step.tool}\n`;
         }
       });
@@ -446,7 +464,7 @@ const handleSend = async (prompt) => {
       if (botMessage) botMessage += "\n";
     }
 
-    if (data.results && Array.isArray(data.results)) {
+    if (Array.isArray(data.results)) {
       data.results.forEach((result, index) => {
         if (result.email_draft) {
           emailDraft = result.email_draft;
@@ -463,18 +481,26 @@ const handleSend = async (prompt) => {
       ...prev,
       {
         sender: "bot",
-        text: botMessage.trim(),
+        text: botMessage.trim() || "The request completed, but no message was returned.",
         ...(emailDraft ? { emailDraft } : {}),
       },
     ]);
   } catch (error) {
     console.error("Chat error:", error);
 
+    const isNetworkError =
+      error instanceof TypeError &&
+      /fetch|network/i.test(error.message);
+
+    const friendlyMessage = isNetworkError
+      ? "I couldn't connect to SynapseOS. Please check that the backend is running and try again."
+      : error.message || "Something went wrong. Please try again.";
+
     setMessages((prev) => [
       ...prev,
       {
         sender: "bot",
-        text: `❌ ${error.message || "Unable to connect to SynapseOS backend."}`,
+        text: friendlyMessage,
       },
     ]);
   } finally {
