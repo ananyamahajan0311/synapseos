@@ -1,5 +1,9 @@
+
+import logging
+
 from fastapi import APIRouter
-import traceback
+from fastapi.responses import JSONResponse
+from google.genai import errors
 
 from api.schemas import PromptRequest
 from agents.planner import Planner
@@ -7,6 +11,8 @@ from agents.executor import Executor
 from memory import Memory
 
 router = APIRouter(tags=["Chat"])
+
+logger = logging.getLogger(__name__)
 
 planner = Planner()
 executor = Executor()
@@ -16,27 +22,15 @@ memory = Memory()
 @router.post("/chat")
 def chat(data: PromptRequest):
     try:
-        # Store the user's message
         memory.add("User", data.prompt)
-
-        # Get conversation history
         context = memory.get_context()
 
-        print("\n========== MEMORY ==========")
-        print(context)
-        print("============================\n")
-
-        # Send the conversation context to Gemini
         plan = planner.plan(data.prompt)
-
-        print("PLAN:", plan)
-
-        # Execute the selected tool
         results = executor.execute(plan, context)
 
         assistant_reply = "\n\n".join(
-              item.get("message", "")
-              for item in results
+            item.get("message", "")
+            for item in results
         )
 
         memory.add("Assistant", assistant_reply)
@@ -45,19 +39,53 @@ def chat(data: PromptRequest):
             "status": "success",
             "message": data.prompt,
             "plan": plan,
-            "results": results
-            }
+            "results": results,
+        }
+
+    except errors.ServerError as exc:
+        status_code = getattr(exc, "status_code", None)
+
+        if status_code in (500, 502, 503, 504):
+            logger.warning(
+                "Gemini temporarily unavailable (HTTP %s).",
+                status_code,
+            )
+            return JSONResponse(
+                status_code=503,
+                content={
+                    "status": "error",
+                    "message": (
+                        "SynapseOS's AI service is temporarily unavailable. "
+                        "Please try again shortly. Check your email drafts "
+                        "before retrying an email request."
+                    ),
+                    "plan": [],
+                    "results": [],
+                },
+            )
+
+        logger.exception("Gemini server error while processing chat.")
+        return JSONResponse(
+            status_code=502,
+            content={
+                "status": "error",
+                "message": "The AI service could not complete your request.",
+                "plan": [],
+                "results": [],
+            },
+        )
 
     except Exception:
-        print("\n========== CHAT ERROR ==========")
-        traceback.print_exc()
-        print("================================\n")
-
-        return {
-            "status": "error",
-            "message": "Failed to process request.",
-            "plan": {},
-            "result": {
-                "message": "Something went wrong."
-            }
-        }
+        logger.exception("Unexpected error while processing chat.")
+        return JSONResponse(
+            status_code=500,
+            content={
+                "status": "error",
+                "message": (
+                    "SynapseOS could not complete your request. "
+                    "Please try again."
+                ),
+                "plan": [],
+                "results": [],
+            },
+        )

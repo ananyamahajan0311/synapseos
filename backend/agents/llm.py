@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 from google import genai
-
+import time
 load_dotenv()
 
 client = genai.Client(
@@ -67,10 +67,15 @@ Generate the final document content now.
 
     return response.text
 
+
 def generate_email(prompt):
-    response = client.models.generate_content(
-        model="gemini-3.6-flash",
-        contents=f"""
+    max_attempts = 3
+
+    for attempt in range(max_attempts):
+        try:
+            response = client.models.generate_content(
+                model="gemini-3.6-flash",
+                contents=f"""
 You are the email-writing assistant for SynapseOS.
 
 The user wants to send an email.
@@ -95,9 +100,29 @@ BODY:
 Do not add explanations.
 Do not use Markdown code blocks.
 """,
-    )
+            )
 
-    return response.text
+            if not response.text or not response.text.strip():
+                raise RuntimeError("Gemini returned an empty email response.")
+
+            return response.text
+
+        except Exception as exc:
+            status_code = getattr(exc, "status_code", None)
+
+            retryable = status_code in (429, 500, 502, 503, 504)
+
+            if not retryable or attempt == max_attempts - 1:
+                raise
+
+            delay = 1.5 * (2 ** attempt)
+            print(
+                f"Temporary Gemini error ({status_code}); "
+                f"retrying in {delay} seconds."
+            )
+            time.sleep(delay)
+
+    raise RuntimeError("Email generation failed.")
 
 def generate_meeting_details(email_text):
     response = client.models.generate_content(
