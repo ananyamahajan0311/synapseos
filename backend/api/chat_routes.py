@@ -9,6 +9,7 @@ from api.schemas import PromptRequest
 from agents.planner import Planner
 from agents.executor import Executor
 from memory import Memory
+from agents.plan_validator import validate_plan, PlanValidationError
 
 router = APIRouter(tags=["Chat"])
 
@@ -25,7 +26,7 @@ def chat(data: PromptRequest):
         memory.add("User", data.prompt)
         context = memory.get_context()
 
-        plan = planner.plan(data.prompt)
+        plan = validate_plan(planner.plan(data.prompt))
         results = executor.execute(plan, context)
 
         assistant_reply = "\n\n".join(
@@ -74,7 +75,17 @@ def chat(data: PromptRequest):
                 "results": [],
             },
         )
-
+    except PlanValidationError as exc:
+        logger.warning("Rejected invalid execution plan: %s", exc)
+        return JSONResponse(
+            status_code=400,
+            content={
+                "status": "error",
+                "message": "The requested execution plan was invalid.",
+                "plan": [],
+                "results": [],
+            },
+        )
     except Exception:
         logger.exception("Unexpected error while processing chat.")
         return JSONResponse(
