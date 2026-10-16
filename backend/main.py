@@ -9,10 +9,12 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from database import engine, Base
+import models
 from api.health_routes import router as health_router
 from api.auth_routes import router as auth_router
 from api.chat_routes import router as chat_router
 from api.email_routes import router as email_router
+from services.email_drafts import recover_incomplete_sends
 
 load_dotenv()
 
@@ -66,6 +68,12 @@ async def unexpected_exception_handler(
 
 
 Base.metadata.create_all(bind=engine)
+recovered_sends = recover_incomplete_sends()
+if recovered_sends:
+    logger.warning(
+        "Marked %s interrupted email send(s) as uncertain.",
+        recovered_sends,
+    )
 
 app.add_middleware(
     CORSMiddleware,
