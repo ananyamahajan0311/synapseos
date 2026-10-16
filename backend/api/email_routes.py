@@ -9,6 +9,7 @@ from models import EmailHistory
 from services.email_drafts import (
     send_approved_draft,
     cancel_draft,
+    update_draft,
 )
 
 router = APIRouter(tags=["Email"])
@@ -20,12 +21,35 @@ class ApproveDraftRequest(BaseModel):
     to_email: str
     subject: str
     message: str
-
+class UpdateDraftRequest(BaseModel):
+    to_email: str
+    subject: str
+    message: str
 
 @router.post("/generate-email")
 def generate_email(data: PromptRequest):
     email = ai_service.generate_email(data.prompt)
     return {"email": email}
+
+@router.put("/email-drafts/{draft_id}")
+def edit_email_draft(
+    draft_id: str,
+    data: UpdateDraftRequest,
+):
+    result = update_draft(
+        draft_id,
+        data.to_email,
+        data.subject,
+        data.message,
+    )
+
+    if result.get("status") != "success":
+        raise HTTPException(
+            status_code=409,
+            detail=result.get("message", "Draft could not be updated."),
+        )
+
+    return result
 
 
 @router.post("/email-drafts/{draft_id}/send")
