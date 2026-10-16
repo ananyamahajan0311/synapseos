@@ -1,9 +1,22 @@
-__pycache__/
-*.pyc
-*.pyo
-.env
-backend/.env
-backend/credentials.json
-backend/token.json
 
+# Environment and credentials
+.env
+.env.*
+!.env.example
+credentials.json
+token.json
+token_old.json
+**/token*.json
+
+# Python generated files
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local backups
+*.bak
+
+# Local database
 backend/synapseos.db
+
+
