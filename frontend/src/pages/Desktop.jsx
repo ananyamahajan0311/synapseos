@@ -508,6 +508,40 @@ const handleSend = async (prompt) => {
   }
 };
 
+
+const handleSaveDraft = async ({
+  draft_id,
+  to_email,
+  subject,
+  message,
+}) => {
+  const response = await fetch(
+    `http://127.0.0.1:8000/email-drafts/${encodeURIComponent(draft_id)}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        to_email,
+        subject,
+        message,
+      }),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.detail || data.message || "Draft could not be saved."
+    );
+  }
+
+  return data;
+};
+
+
 const handleApproveDraft = async ({
   draft_id,
   to_email,
@@ -596,6 +630,7 @@ const handleCancelDraft = async (draftId) => {
 
           {/* Chat */}
           
+
 {messages.map((msg, index) => (
   <ChatMessage
     key={index}
@@ -603,9 +638,11 @@ const handleCancelDraft = async (draftId) => {
     text={msg.text}
     emailDraft={msg.emailDraft}
     onApprove={handleApproveDraft}
+    onSaveDraft={handleSaveDraft}
     onCancel={handleCancelDraft}
   />
 ))}
+
 
 
           {isThinking && (

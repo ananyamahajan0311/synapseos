@@ -82,23 +82,17 @@ export default function ChatMessage({
   text,
   emailDraft,
   onApprove,
+  onSaveDraft,
   onCancel,
 }) {
   const isUser = sender === "user";
 
-  const [toEmail, setToEmail] = useState(
-    emailDraft?.to_email || ""
-  );
-  const [subject, setSubject] = useState(
-    emailDraft?.subject || ""
-  );
-  const [body, setBody] = useState(
-    emailDraft?.body || ""
-  );
+  const [toEmail, setToEmail] = useState(emailDraft?.to_email || "");
+  const [subject, setSubject] = useState(emailDraft?.subject || "");
+  const [body, setBody] = useState(emailDraft?.body || "");
 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-
   const [draftStatus, setDraftStatus] = useState("pending");
 
   const handleCancel = async () => {
@@ -125,26 +119,42 @@ export default function ChatMessage({
       return;
     }
 
-    if (!window.confirm(
-      `Send this email to ${toEmail.trim()}?`
-    )) {
+    if (
+      !window.confirm(
+        `Send this email to ${toEmail.trim()}?`
+      )
+    ) {
       return;
     }
 
     setBusy(true);
     setError("");
 
+    const approvedContent = {
+      draft_id: emailDraft.draft_id,
+      to_email: toEmail.trim(),
+      subject: subject.trim(),
+      message: body.trim(),
+    };
+
     try {
-      await onApprove({
-        draft_id: emailDraft.draft_id,
-        to_email: toEmail.trim(),
-        subject: subject.trim(),
-        message: body.trim(),
-      });
+      if (typeof onSaveDraft !== "function") {
+        throw new Error(
+          "Draft saving is not configured. Please try again later."
+        );
+      }
+
+      // Save the exact edited content before sending.
+      await onSaveDraft(approvedContent);
+
+      // Only request sending after saving succeeds.
+      await onApprove(approvedContent);
 
       setDraftStatus("sent");
     } catch (err) {
-      setError(err.message || "Could not send the email.");
+      setError(
+        err.message || "Could not save or send the email."
+      );
     } finally {
       setBusy(false);
     }
@@ -188,7 +198,10 @@ export default function ChatMessage({
               Review the complete email before sending.
             </div>
 
-            <label style={styles.label} htmlFor={`to-${emailDraft.draft_id}`}>
+            <label
+              style={styles.label}
+              htmlFor={`to-${emailDraft.draft_id}`}
+            >
               To
             </label>
             <input
@@ -200,7 +213,10 @@ export default function ChatMessage({
               onChange={(e) => setToEmail(e.target.value)}
             />
 
-            <label style={styles.label} htmlFor={`subject-${emailDraft.draft_id}`}>
+            <label
+              style={styles.label}
+              htmlFor={`subject-${emailDraft.draft_id}`}
+            >
               Subject
             </label>
             <input
@@ -211,7 +227,10 @@ export default function ChatMessage({
               onChange={(e) => setSubject(e.target.value)}
             />
 
-            <label style={styles.label} htmlFor={`body-${emailDraft.draft_id}`}>
+            <label
+              style={styles.label}
+              htmlFor={`body-${emailDraft.draft_id}`}
+            >
               Email body
             </label>
             <textarea
@@ -226,18 +245,20 @@ export default function ChatMessage({
               onChange={(e) => setBody(e.target.value)}
             />
 
-            {emailDraft.validation?.warnings?.map((warning, index) => (
-              <div
-                key={index}
-                style={{
-                  marginTop: "8px",
-                  color: "#8A5A00",
-                  fontSize: "12px",
-                }}
-              >
-                ⚠️ {warning}
-              </div>
-            ))}
+            {emailDraft.validation?.warnings?.map(
+              (warning, index) => (
+                <div
+                  key={index}
+                  style={{
+                    marginTop: "8px",
+                    color: "#8A5A00",
+                    fontSize: "12px",
+                  }}
+                >
+                  ⚠️ {warning}
+                </div>
+              )
+            )}
 
             {error && (
               <div
