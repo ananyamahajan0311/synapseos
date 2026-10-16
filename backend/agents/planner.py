@@ -1,6 +1,6 @@
 import json
 from agents.llm import generate_plan
-
+from agents.plan_validator import validate_plan, PlanValidationError
 
 class Planner:
 
@@ -332,6 +332,7 @@ class Planner:
         # GEMINI FALLBACK
         # ============================================================
 
+     
         response = generate_plan(
             prompt,
             self.system_prompt
@@ -345,16 +346,10 @@ class Planner:
         )
 
         try:
-
             plan = json.loads(response)
+            return validate_plan(plan)
 
-            if isinstance(plan, dict):
-                plan = [plan]
-
-            return plan
-
-        except Exception:
-
+        except (json.JSONDecodeError, PlanValidationError):
             return [
                 {
                     "tool": "chat",
