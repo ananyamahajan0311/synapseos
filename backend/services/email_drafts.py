@@ -8,7 +8,7 @@ from sqlalchemy import update
 from database import SessionLocal
 from models import EmailDraft
 from tools.gmail_send import send_email
-
+from services.email_validation import validate_email_address
 
 DRAFT_TTL_MINUTES = 15
 
@@ -25,9 +25,7 @@ def _utc(value):
 
 
 def _public_draft(draft):
-    valid_format = bool(
-        re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", draft.recipient or "")
-    )
+    valid_format = validate_email_address(draft.recipient)
 
     warnings = [
         "Email format validation does not verify the recipient's identity."
@@ -56,6 +54,11 @@ def _public_draft(draft):
 
 def create_draft(to_email, subject, body):
     to_email = (to_email or "").strip()
+    if not validate_email_address(to_email):
+        return {
+        "status": "error",
+        "message": "Enter a valid email address.",
+    }
     subject = subject or ""
     body = body or ""
     now = _now()
@@ -89,7 +92,7 @@ def update_draft(draft_id, to_email, subject, body):
     subject = subject or ""
     body = body or ""
 
-    if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", to_email):
+    if not validate_email_address(to_email):
         return {"status": "error", "message": "Enter a valid email address."}
 
     if not subject.strip():
@@ -213,7 +216,7 @@ def send_approved_draft(draft_id, to_email, subject, body):
     subject = subject or ""
     body = body or ""
 
-    if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", to_email):
+    if not validate_email_address(to_email):
         return {"status": "error", "message": "Enter a valid email address."}
 
     if not subject.strip():
@@ -286,35 +289,61 @@ def send_approved_draft(draft_id, to_email, subject, body):
     finally:
         db.close()
 
+    
     # Never hold a database transaction open during the Gmail request.
     try:
         result = send_email(to_email, subject, body)
+       
     except Exception as exc:
         print("EMAIL SEND EXCEPTION TYPE:", type(exc).__name__)
+        failure_status = _classify_gmail_error(exc)
+        error_message = (
+            "Gmail rejected the request. Check the error details before "
+            "creating a new draft."
+            if failure_status == "failed"
+            else "The send outcome could not be confirmed. "
+                 "Check Gmail before attempting another send."
+        )
         _set_send_result(
             draft_id,
-            "send_uncertain",
-            error="The send outcome could not be confirmed.",
+            failure_status,
+            error=error_message,
         )
         return {
             "status": "error",
-            "message": (
-                "The send result could not be confirmed. "
-                "Check Gmail before attempting another send."
-            ),
+            "message": error_message,
         }
 
+
+        
+
+    
     if (
         isinstance(result, dict)
         and result.get("status") == "success"
         and result.get("message_id")
     ):
-        _set_send_result(
+        status_saved = _set_send_result(
             draft_id,
             "sent",
             message_id=result["message_id"],
         )
-        return result
+
+        if not status_saved:
+            return {
+                **result,
+                "status_persisted": False,
+                "message": (
+                    "Gmail accepted the email, but SynapseOS could not "
+                    "save the final status. Do not resend the email. "
+                    "Check your Gmail Sent folder."
+                ),
+            }
+
+        return {
+            **result,
+            "status_persisted": True,
+        }
 
     _set_send_result(
         draft_id,
@@ -330,6 +359,8 @@ def send_approved_draft(draft_id, to_email, subject, body):
     }
 
 
+
+
 def _set_send_result(draft_id, status, message_id=None, error=None):
     db = SessionLocal()
     try:
@@ -338,18 +369,26 @@ def _set_send_result(draft_id, status, message_id=None, error=None):
             .filter(EmailDraft.draft_id == draft_id)
             .first()
         )
-        if draft:
-            draft.status = status
-            draft.message_id = message_id
-            draft.last_error = error
-            draft.updated_at = _now()
-            db.commit()
+
+        if not draft:
+            return False
+
+        draft.status = status
+        draft.message_id = message_id
+        draft.last_error = error
+        draft.updated_at = _now()
+        db.commit()
+        return True
+
     except Exception:
         db.rollback()
-        # Do not automatically resend if recording the result fails.
-        print("EMAIL STATUS PERSISTENCE FAILED")
+        import traceback
+        traceback.print_exc()
+        return False
+
     finally:
         db.close()
+
 
 
 def recover_incomplete_sends():
@@ -377,3 +416,16 @@ def recover_incomplete_sends():
         raise
     finally:
         db.close()
+
+def _classify_gmail_error(exc):
+    """Conservatively classify Gmail API errors."""
+    from googleapiclient.errors import HttpError
+
+    if isinstance(exc, HttpError):
+        status_code = getattr(exc.resp, "status", None)
+
+        if status_code == 400:
+            return "failed"
+
+    return "send_uncertain"
+ 
