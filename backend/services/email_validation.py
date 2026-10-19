@@ -19,8 +19,17 @@ def validate_email_address(value):
     if len(value) > 254 or not EMAIL_PATTERN.fullmatch(value):
         return False
 
+    
     local_part, domain = value.rsplit("@", 1)
+    domain = domain.lower()
+
+    if domain == "localhost":
+        return False
+
+    if domain.endswith((".invalid", ".test", ".example", ".localhost")):
+        return False
 
     return len(local_part) <= 64 and all(
         len(label) <= 63 for label in domain.split(".")
     )
+
