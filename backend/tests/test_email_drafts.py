@@ -57,6 +57,17 @@ def test_draft_persists_in_database(test_db):
         db.close()
 
 
+def test_valid_recipient_has_no_generic_identity_warning(test_db):
+    draft = email_drafts.create_draft(
+        "test@example.com",
+        "Test subject",
+        "Test body",
+    )
+
+    assert draft["validation"]["recipient_format_valid"] is True
+    assert draft["validation"]["warnings"] == []
+
+
 def test_recovery_marks_interrupted_send_uncertain(test_db):
     now = datetime.now(timezone.utc)
     db = test_db()
