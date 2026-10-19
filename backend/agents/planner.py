@@ -229,39 +229,63 @@ class Planner:
         
 
         # ============================================================
-        # DOCS + GMAIL
+        # DOCS + GMAIL: CREATE, THEN PREVIEW
         # ============================================================
 
         if (
             (
                 "document" in text
                 or "google doc" in text
-                or "create a document" in text
-                or "create document" in text
                 or "create doc" in text
                 or "new document" in text
             )
-            and
-            (
-                "email" in text
-                or "send" in text
-            )
+            and ("email" in text or "send" in text)
         ):
             return [
                 {
                     "tool": "docs_create",
                     "input": prompt
-                },
-                {
-                    "tool": "gmail_send",
-                    "input": prompt
                 }
             ]
-
         # ============================================================
         # GOOGLE DOCS LIST
         # ============================================================
+        if (
+    "preview" in text
+    and ("spreadsheet" in text or "google sheet" in text or "google sheets" in text)
+    and not any(phrase in text for phrase in (
+        "create a spreadsheet",
+        "create spreadsheet",
+        "create a sheet",
+        "new spreadsheet",
+    ))
+):
+            return [
+                {
+                    "tool": "sheets_preview",
+                    "input": prompt
+                }
+            ]
+        if (
+    "preview" in text
+    and ("document" in text or "google doc" in text or "google docs" in text)
+    and not any(phrase in text for phrase in (
+        "create a document",
+        "create document",
+        "create doc",
+        "new document",
+        "create a google doc",
+        "create google doc",
+    ))
+):
+             return [
+        {
+            "tool": "docs_preview",
+            "input": prompt
+        }
+    ]
 
+        
         if (
             "show my documents" in text
             or "list my documents" in text
