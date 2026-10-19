@@ -452,7 +452,8 @@ const handleSend = async (prompt) => {
     console.log("Backend Response:", data);
 
     let botMessage = "";
-    let emailDraft = null;
+let emailDraft = null;
+let documentPreview = null;
 
     if (Array.isArray(data.plan)) {
       data.plan.forEach((step, index) => {
@@ -467,8 +468,17 @@ const handleSend = async (prompt) => {
     if (Array.isArray(data.results)) {
       data.results.forEach((result, index) => {
         if (result.email_draft) {
-          emailDraft = result.email_draft;
-        }
+  emailDraft = result.email_draft;
+}
+
+if (
+  result.status === "success" &&
+  result.preview
+) {
+  documentPreview = result.preview;
+} {
+  documentPreview = result;
+}
 
         botMessage += `✅ Result ${index + 1}\n`;
         botMessage += `${result.message || "Action completed."}\n\n`;
@@ -483,6 +493,7 @@ const handleSend = async (prompt) => {
         sender: "bot",
         text: botMessage.trim() || "The request completed, but no message was returned.",
         ...(emailDraft ? { emailDraft } : {}),
+        ...(documentPreview ? { documentPreview } : {}),
       },
     ]);
   } catch (error) {
