@@ -24,12 +24,10 @@ def _utc(value):
     return value.astimezone(timezone.utc)
 
 
+
 def _public_draft(draft):
     valid_format = validate_email_address(draft.recipient)
-
-    warnings = [
-        "Email format validation does not verify the recipient's identity."
-    ]
+    warnings = []
 
     if not valid_format:
         warnings.append("The recipient email format appears invalid.")
@@ -50,6 +48,7 @@ def _public_draft(draft):
             "warnings": warnings,
         },
     }
+
 
 
 def create_draft(to_email, subject, body):
@@ -296,6 +295,7 @@ def send_approved_draft(draft_id, to_email, subject, body):
        
     except Exception as exc:
         print("EMAIL SEND EXCEPTION TYPE:", type(exc).__name__)
+        print("EMAIL SEND ERROR:", str(exc))
         failure_status = _classify_gmail_error(exc)
         error_message = (
             "Gmail rejected the request. Check the error details before "
