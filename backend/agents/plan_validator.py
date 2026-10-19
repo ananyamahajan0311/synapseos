@@ -1,4 +1,4 @@
-
+﻿
 from typing import Any
 
 
@@ -16,7 +16,9 @@ ALLOWED_TOOLS = {
     "gmail_send",
     "email_summarize",
     "docs_create",
-    "docs_list",
+        "docs_list",
+    "docs_preview",
+    "sheets_preview",
     "sheets_create",
 }
 
@@ -126,3 +128,5 @@ def validate_plan(plan: Any) -> list[dict]:
         visit(step["id"])
 
     return validated
+
+
