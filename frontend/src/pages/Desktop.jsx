@@ -571,7 +571,15 @@ const handleApproveDraft = async ({
     );
   }
 
-  window.alert("Email sent successfully!");
+  if (data.status_persisted === false) {
+  window.alert(
+    "Gmail accepted the email, but SynapseOS could not save the final status. Do not resend it. Check your Gmail Sent folder."
+  );
+} else {
+  window.alert(
+    "Accepted by Gmail — delivery to the recipient is not yet confirmed."
+  );
+}
   return data;
 };
 
