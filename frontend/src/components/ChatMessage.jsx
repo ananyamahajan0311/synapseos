@@ -327,7 +327,8 @@ export default function ChatMessage({
       lineHeight: "1.5",
     }}
   >
-    <strong>Recipient not verified</strong>
+    <strong>Heading: Please verify the recipient
+            Message: Check that the email address is correct before sending. SynapseOS validates the address format but cannot confirm that the mailbox exists. Gmail acceptance does not guarantee delivery.</strong>
     <div>
       SynapseOS has not confirmed that {toEmail.trim() || "this address"}
       {" "}belongs to the intended recipient or that its mailbox exists.
