@@ -307,8 +307,8 @@ export default function ChatMessage({
             ) : (
               <div style={{ marginTop: "12px", fontWeight: 800 }}>
                 {draftStatus === "sent"
-                  ? "✅ Email sent"
-                  : "Draft cancelled"}
+  ? "✅ Accepted by Gmail — delivery not confirmed"
+  : "Draft cancelled"}
               </div>
             )}
           </div>
