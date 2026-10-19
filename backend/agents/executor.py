@@ -26,7 +26,8 @@ from tools.gmail_read import read_emails
 from tools.gmail_send import send_email
 from tools.gmail_search import search_emails
 from tools.gmail_parser import parse_email_command
-
+from tools.docs_preview import preview_document
+from tools.sheets_preview import preview_spreadsheet
 from tools.docs_create import create_document
 from tools.docs_list import list_documents
 
@@ -459,6 +460,17 @@ IMPORTANT:
                 result = create_document(
                     tool_input
                 )
+                if result.get("status") == "success":
+                    preview = preview_document(result["document_id"])
+
+                    if preview.get("status") == "success":
+                        result["content"] = preview.get("content", "")
+                        result["preview"] = preview
+                    else:
+                        result["preview_warning"] = preview.get(
+                            "message",
+                            "Document created, but preview could not be loaded."
+                        )
 
                 if result.get("status") == "success":
 
@@ -498,6 +510,14 @@ IMPORTANT:
 
                 result = list_documents()
 
+            elif tool == "docs_preview":
+
+                result = preview_document(tool_input)
+
+            elif tool == "sheets_preview":
+
+                result = preview_spreadsheet(tool_input)
+
             # ==================================================
             # GOOGLE SHEETS CREATE
             # ==================================================
@@ -507,6 +527,17 @@ IMPORTANT:
                 result = create_sheet(
                     tool_input
                 )
+                if result.get("status") == "success":
+                    preview = preview_spreadsheet(result["spreadsheet_id"])
+
+                    if preview.get("status") == "success":
+                        result["sheets"] = preview.get("sheets", [])
+                        result["preview"] = preview
+                    else:
+                        result["preview_warning"] = preview.get(
+                            "message",
+                            "Spreadsheet created, but preview could not be loaded."
+                        )
 
                 if result.get("status") == "success":
 
