@@ -14,7 +14,8 @@ def validate_email_address(value):
     if not isinstance(value, str):
         return False
 
-    value = value.strip()
+    if value != value.strip():
+        return False
 
     if len(value) > 254 or not EMAIL_PATTERN.fullmatch(value):
         return False
