@@ -81,8 +81,9 @@ export default function ChatMessage({
   sender,
   text,
   emailDraft,
+  documentPreview,
   onApprove,
-  onSaveDraft,
+    onSaveDraft,
   onCancel,
 }) {
   const isUser = sender === "user";
@@ -181,6 +182,69 @@ export default function ChatMessage({
 
       <div style={isUser ? styles.bubbleUser : styles.bubbleBot}>
         {text}
+                {documentPreview && (
+          <div
+            style={{
+              marginTop: "14px",
+              padding: "14px",
+              border: "1px solid #DCD3F0",
+              borderRadius: "14px",
+              background: "#F8F5FF",
+              minWidth: 0,
+            }}
+          >
+            <div style={{ fontSize: "16px", fontWeight: 900 }}>
+              📄 {documentPreview.title || "Google file preview"}
+            </div>
+
+            <div style={{ marginTop: "8px", fontSize: "13px" }}>
+              {documentPreview.content ? (
+                <pre
+                  style={{
+                    whiteSpace: "pre-wrap",
+                    overflowWrap: "anywhere",
+                    maxHeight: "300px",
+                    overflowY: "auto",
+                    font: "inherit",
+                  }}
+                >
+                  {documentPreview.content}
+                </pre>
+              ) : documentPreview.sheets ? (
+                documentPreview.sheets.map((sheet, index) => (
+                  <div key={index} style={{ marginTop: "10px" }}>
+                    <strong>{sheet.sheet_name}</strong>
+                    <pre
+                      style={{
+                        whiteSpace: "pre-wrap",
+                        overflowWrap: "anywhere",
+                        maxHeight: "300px",
+                        overflowY: "auto",
+                        font: "inherit",
+                      }}
+                    >
+                      {sheet.values
+                        .map((row) => row.join(" | "))
+                        .join("\n")}
+                    </pre>
+                  </div>
+                ))
+              ) : (
+                "No preview content available."
+              )}
+            </div>
+
+            {documentPreview.url && (
+              <a
+                href={documentPreview.url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Open in Google Drive
+              </a>
+            )}
+          </div>
+        )}
 
         {emailDraft && (
           <div
