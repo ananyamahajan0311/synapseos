@@ -66,7 +66,22 @@ def test_valid_recipient_has_no_generic_identity_warning(test_db):
 
     assert draft["validation"]["recipient_format_valid"] is True
     assert draft["validation"]["warnings"] == []
+def test_reserved_invalid_domain_is_rejected(test_db, monkeypatch):
+    draft = email_drafts.create_draft(
+        "test@example.com",
+        "Test subject",
+        "Test body",
+    )
+    assert draft["status"] != "error"
 
+    result = email_drafts.update_draft(
+        draft["draft_id"],
+        "user@invalid",
+        "Test subject",
+        "Test body",
+    )
+
+    assert result["status"] == "error"
 
 def test_recovery_marks_interrupted_send_uncertain(test_db):
     now = datetime.now(timezone.utc)
