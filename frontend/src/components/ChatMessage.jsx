@@ -120,12 +120,15 @@ export default function ChatMessage({
     }
 
     if (
-      !window.confirm(
-        `Send this email to ${toEmail.trim()}?`
-      )
-    ) {
-      return;
-    }
+  !window.confirm(
+    `WARNING: SynapseOS has not verified that this mailbox exists.\n\n` +
+    `Recipient: ${toEmail.trim()}\n\n` +
+    `Please check the address carefully. Gmail accepting the email does not guarantee delivery.\n\n` +
+    `Do you still want to send this email?`
+  )
+) {
+  return;
+}
 
     setBusy(true);
     setError("");
@@ -245,6 +248,30 @@ export default function ChatMessage({
               onChange={(e) => setBody(e.target.value)}
             />
 
+            
+{draftStatus === "pending" && (
+  <div
+    role="status"
+    style={{
+      marginTop: "12px",
+      padding: "10px 12px",
+      background: "#FFF4DB",
+      border: "1px solid #E9C46A",
+      borderRadius: "8px",
+      color: "#795300",
+      fontSize: "13px",
+      lineHeight: "1.5",
+    }}
+  >
+    <strong>Recipient not verified</strong>
+    <div>
+      SynapseOS has not confirmed that {toEmail.trim() || "this address"}
+      {" "}belongs to the intended recipient or that its mailbox exists.
+      Check the address carefully before sending.
+    </div>
+  </div>
+)}
+
             {emailDraft.validation?.warnings?.map(
               (warning, index) => (
                 <div
@@ -307,7 +334,7 @@ export default function ChatMessage({
             ) : (
               <div style={{ marginTop: "12px", fontWeight: 800 }}>
                 {draftStatus === "sent"
-  ? "✅ Accepted by Gmail — delivery not confirmed"
+  ? "✅ Email sent successfully"
   : "Draft cancelled"}
               </div>
             )}
